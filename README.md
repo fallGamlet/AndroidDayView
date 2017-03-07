@@ -1,7 +1,7 @@
 # AndroidDayView
 Android custom views for present day TimeLine or DayPager
 
-![](images/img1.png)
+![](images/img1.png =50x150)
 
 Features
 ------------
