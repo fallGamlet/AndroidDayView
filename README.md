@@ -1,8 +1,17 @@
 # AndroidDayView
 Android custom views for present day TimeLine or DayPager
+Features
+------------
+
+* Day view timeline
+* Day view calendar
+* Horizontal and vertical scrolling
+* Infinite horizontal scrolling
+* Live preview of custom styling in xml preview window
 
 
-### How to use
+Usage
+---------
 **TimeLine**
 
 Add TimeLineView into a layout
@@ -47,7 +56,6 @@ TimeLineView timeLineView = (TimeLineView) findViewById(R.id.timeLineView);
 ```
 
 For add events into *timeline* need create class with implement *TimeLineView.IEventHolder*. It must be holder with contain view
-
 ```java
 public static class  MyEventHolder implements TimeLineView.IEventHolder {
   View rootView;
@@ -68,10 +76,42 @@ public static class  MyEventHolder implements TimeLineView.IEventHolder {
   }
 }
 ```
-Add event view into *TimeLineView*
 
+Add event view into *TimeLineView*
 ```java
 MyEventHolder holder = new MyEventHolder(getContext());
 holder.timeInterval = new TimeLineView.MinuteInterval(6*60, 7*60+20);
 timeline.add(holder);
+```
+Add disabled interval into *TimeLineView*
+```java
+List<TimeLineView.MinuteInterval> disabledTimes = timeLineView.getDisabledTimes();
+disabledTimes.add(new TimeLineView.MinuteInterval(8*HOUR+48, 10*HOUR+25));
+disabledTimes.add(new TimeLineView.MinuteInterval(15*HOUR+15, 17*HOUR+5));
+```
+
+Add colored interval into *TimeLineView*
+```java
+timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#200000FF"), new TimeLineView.MinuteInterval(0, 7*HOUR+30)));
+```
+
+Set listener for time selection
+```java
+timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
+    @Override
+    public void onTimePress(Object sender, int minute) {
+        String txt = String.format(Locale.getDefault(), "Selected on %02d:%02d", minute/60, minute%60);
+        showSnackbar(txt);
+    }
+
+    @Override
+    public void onTimeLongPressed(Object sender, int minute) {
+        String txt = String.format(Locale.getDefault(), "Selected on %02d:%02d", minute/60, minute%60);
+        showSnackbar(txt);
+    }
+});
+
+private void showSnackbar(String msg) {
+    Snackbar.make(timeLineView, msg, Snackbar.LENGTH_SHORT).show();
+}
 ```
