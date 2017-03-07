@@ -112,6 +112,7 @@ public class DayPagerAdapter extends PagerAdapter {
         }
         listener.onBindData(holder, position);
         if (holder.getView() != null) {
+//            holder.getView().setVisibility(View.VISIBLE);
             holder.getView().invalidate();
         }
 

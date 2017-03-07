@@ -203,6 +203,8 @@ public class DayViewActivity extends AppCompatActivity {
         //region Methods
         protected void initView(Context context) {
             View view = View.inflate(context, R.layout.layout_event, null);
+            view.setFocusable(false);
+//            view.setFocusableInTouchMode(false);
             setView(view);
         }
 

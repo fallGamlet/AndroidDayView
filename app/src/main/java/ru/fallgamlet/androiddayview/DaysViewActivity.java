@@ -36,6 +36,7 @@ public class DaysViewActivity extends AppCompatActivity {
 
         dayViewPager = (DayViewPager) findViewById(R.id.dayViewPager);
         dayViewPager.setOnContentListener(getContextListener());
+        dayViewPager.setFocusable(false);
     }
 
 
@@ -108,7 +109,7 @@ public class DaysViewActivity extends AppCompatActivity {
         List<TimeLineView.IEventHolder> holderList = new ArrayList<>();
         int weekDay = date.get(Calendar.DAY_OF_WEEK);
         TimeLineView.MinuteInterval workTime = getWorkTime(weekDay);
-        int count = 5+random.nextInt(15);
+        int count = 5+random.nextInt(10);
         int hour = 60;
         int minMinute = workTime.getStart()*hour;
         int maxMinute = workTime.getEnd()*hour;
@@ -117,7 +118,7 @@ public class DaysViewActivity extends AppCompatActivity {
             int start = minMinute + random.nextInt(maxMinute-minMinute);
             int minLength = 20;
             int length = maxMinute - start - minLength;
-            length = length < 0? minLength: minLength+random.nextInt(length);
+            length = length <= 0? minLength: minLength+random.nextInt(length);
             if (length > 2*hour) { length = 2*hour; }
             int end = start + length;
 
