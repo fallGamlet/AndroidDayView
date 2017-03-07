@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Android Day View</string>
+    <string name="action_today">Today</string>
+    <string name="action_day_view">Day view</string>
+    <string name="title_activity_dayview">Day view</string>
+    <string name="title_activity_daysview">Days view</string>
+</resources>

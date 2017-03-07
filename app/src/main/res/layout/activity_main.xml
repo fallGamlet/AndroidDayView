@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="#fff">
+
+    <Button
+        android:id="@+id/buttonDayView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title_activity_dayview"
+        style="@style/Button"/>
+
+    <Button
+        android:id="@+id/buttonDaysView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title_activity_daysview"
+        style="@style/Button"/>
+
+</LinearLayout>

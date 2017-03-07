@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/AppTheme.EventItem"
+    android:background="#107ab6"
+    android:foreground="@drawable/selector_fg_default">
+
+    <View
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/toolbar_text"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_gravity="top|start">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/startView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10:00"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" - "/>
+
+            <TextView android:id="@+id/endView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:00"/>
+
+        </LinearLayout>
+
+        <TextView android:id="@+id/titleView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"/>
+
+        <TextView android:id="@+id/subtitleView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="subtitle" />
+
+    </LinearLayout>
+
+</FrameLayout>

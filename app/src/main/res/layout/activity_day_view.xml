@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_day_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#999"
+    tools:context=".DayViewActivity">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ru.fallgamlet.dayview.TimeLineView android:id="@+id/timeLineView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFF"
+            app:hourMin="6"
+            app:hourMax="20"
+            app:hourHeight="60dp"
+            app:hourPaddingLeft="8dp"
+            app:hourPaddingRight="4dp"
+            app:hourLineWidth="0.5dp"
+            app:hourLineColor="#777"
+            app:hourBackground="#C0FFFFFF"
+            app:hourTextColor="#4e4e4e"
+            app:hourTextSize="12sp"
+            app:disabledTimeColor="#99555555"/>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</RelativeLayout>
