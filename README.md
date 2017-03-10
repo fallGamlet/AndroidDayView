@@ -2,21 +2,23 @@
 Android custom views for present day TimeLine or DayPager
 
 ![](images/img1.png)
+![](images/img2.png)
 
 Features
 ------------
-
 * Day view timeline
 * Day view calendar
 * Horizontal and vertical scrolling
 * Infinite horizontal scrolling
 * Live preview of custom styling in xml preview window
+* Can set min and max hours
+* Can add disabled intervals
+* Can add colored intervals
 
 
-Usage
----------
-**TimeLine**
 
+Usage TimeLineView
+------------------
 Add TimeLineView into a layout
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -48,7 +50,6 @@ Add TimeLineView into a layout
             app:disabledTimeColor="#99555555"/>
 
     </android.support.v4.widget.NestedScrollView>
-
 </RelativeLayout>
 ```
 
@@ -73,7 +74,7 @@ public static class  MyEventHolder implements TimeLineView.IEventHolder {
   public TimeLineView.MinuteInterval getTimeInterval() {
       return timeInterval;
   }
-  
+
   public MyEventHolder(Context context) {
       rootView = View.inflate(context, R.layout.layout_event, null);
   }
@@ -95,7 +96,9 @@ disabledTimes.add(new TimeLineView.MinuteInterval(15*HOUR+15, 17*HOUR+5));
 
 Add colored interval into *TimeLineView*
 ```java
-timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#200000FF"), new TimeLineView.MinuteInterval(0, 7*HOUR+30)));
+int color = Color.parseColor("#200000FF");
+TimeLineView.MinuteInterval interval = new TimeLineView.MinuteInterval(0, 7*HOUR+30);
+timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(color, interval));
 ```
 
 Set listener for time selection
@@ -117,4 +120,74 @@ timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
 private void showSnackbar(String msg) {
     Snackbar.make(timeLineView, msg, Snackbar.LENGTH_SHORT).show();
 }
+```
+
+Usage DayViewPager
+------------------
+
+Add DayViewPager into a layout
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_day_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#999"
+    tools:context=".DaysViewActivity">
+
+    <ru.fallgamlet.dayview.DayViewPager android:id="@+id/dayViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF"
+        app:hourHeight="50dp"
+        app:hourMin="6"
+        app:hourMax="22"/>
+
+</RelativeLayout>
+```
+
+Get DayViewPager in code
+```java
+DayViewPager dayViewPager = (DayViewPager) findViewById(R.id.dayViewPager);
+```
+
+Set listener for DayViewPager
+```java
+dayViewPager.setOnContentListener(return new DayViewPager.OnContentListener() {
+    @Override
+    public int getMinHour(Calendar date) {
+        // return min Hour for the date
+        return 0;
+    }
+
+    @Override
+    public int getMaxHour(Calendar date) {
+        // return max Hour for the date
+        return 24;
+    }
+
+    @Override
+    public List<TimeLineView.IEventHolder> getEvents(Calendar date) {
+        // return event holders for the date
+        return null;
+    }
+
+    @Override
+    public List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date) {
+        // return colored intervals for the date
+        return null;
+    }
+
+    @Override
+    public List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date) {
+        // return disabled intervals for the date
+        return null;
+    }
+});
 ```
