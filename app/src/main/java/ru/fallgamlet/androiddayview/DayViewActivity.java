@@ -37,8 +37,8 @@ public class DayViewActivity extends AppCompatActivity {
 
         final int HOUR = 60;
         int startMinute, endMinute;
-        startMinute = 6*HOUR;
-        endMinute = startMinute + 2*HOUR;
+        startMinute = -1*HOUR + 20;
+        endMinute = startMinute + 2*HOUR + 45;
         events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
 
         startMinute = 9*HOUR;
@@ -61,8 +61,8 @@ public class DayViewActivity extends AppCompatActivity {
         endMinute = startMinute + 1*HOUR;
         events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
 
-        startMinute = 12*HOUR+40;
-        endMinute = startMinute + 1*HOUR+30;
+        startMinute = 22*HOUR+40;
+        endMinute = startMinute + 2*HOUR+30;
         events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
         //endregion
 
@@ -190,7 +190,7 @@ public class DayViewActivity extends AppCompatActivity {
 
         public SimpleDateFormat getTimeFormatter() {
             if (timeFormatter == null) {
-                timeFormatter = new SimpleDateFormat("hh:mm", Locale.getDefault());
+                timeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
             }
             return timeFormatter;
         }
@@ -230,13 +230,17 @@ public class DayViewActivity extends AppCompatActivity {
                 int startMinute = timeInterval.getStart();
                 int endMinute = timeInterval.getEnd();
                 Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, startMinute / 60);
-                calendar.set(Calendar.MINUTE, startMinute % 60);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.add(Calendar.MINUTE, startMinute);
 
                 startStr = formatTime(calendar.getTime());
 
-                calendar.set(Calendar.HOUR_OF_DAY, endMinute/60);
-                calendar.set(Calendar.MINUTE, endMinute%60);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.add(Calendar.MINUTE, endMinute);
+//                calendar.set(Calendar.HOUR_OF_DAY, endMinute/60);
+//                calendar.set(Calendar.MINUTE, endMinute%60);
 
                 endStr = formatTime(calendar.getTime());
             }
