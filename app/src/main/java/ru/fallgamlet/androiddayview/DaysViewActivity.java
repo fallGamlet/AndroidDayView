@@ -57,6 +57,7 @@ public class DaysViewActivity extends AppCompatActivity {
         dayViewPager = (DayViewPager) findViewById(R.id.dayViewPager);
         dayViewPager.setOnContentListener(getContextListener());
         dayViewPager.setOnDesignListener(getDesignListener());
+        dayViewPager.setOnPageListener(getOnPageChangeListener());
         dayViewPager.setFocusable(false);
 
         Calendar calendar = Calendar.getInstance();
@@ -90,6 +91,24 @@ public class DaysViewActivity extends AppCompatActivity {
         if (date == null) {
             return;
         }
+
+        if (curDate != null) {
+            Calendar curCalendar = Calendar.getInstance();
+            curCalendar.setTime(curDate);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            int curYear = curCalendar.get(Calendar.YEAR);
+            int curDay = curCalendar.get(Calendar.DAY_OF_YEAR);
+            int year = calendar.get(Calendar.YEAR);
+            int day = calendar.get(Calendar.DAY_OF_YEAR);
+
+            if (curYear == year && curDay == day) {
+                return;
+            }
+        }
+
         curDate = date;
         if (dateBtn != null) {
             SimpleDateFormat formatter = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
@@ -268,6 +287,22 @@ public class DaysViewActivity extends AppCompatActivity {
             };
         }
         return designListener;
+    }
+    //endregion
+
+    //region OnPageChangeListener
+    DayViewPager.OnPageChangeListener onPageChangeListener;
+    @NonNull
+    DayViewPager.OnPageChangeListener getOnPageChangeListener() {
+        if (onPageChangeListener == null) {
+            onPageChangeListener = new DayViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageSeleted(Calendar selectedDate) {
+                    setDate(selectedDate==null? null: selectedDate.getTime());
+                }
+            };
+        }
+        return onPageChangeListener;
     }
     //endregion
 

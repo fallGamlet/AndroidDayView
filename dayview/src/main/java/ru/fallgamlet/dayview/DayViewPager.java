@@ -18,6 +18,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -125,6 +126,10 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         //endregion
     }
 
+    public interface OnPageChangeListener {
+        void onPageSeleted(Calendar selectedDate);
+    }
+
     public interface OnContentListener {
         int getMinHour(Calendar date);
         int getMaxHour(Calendar date);
@@ -167,6 +172,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     DayPagerAdapter adapter;
     OnContentListener contentListener;
     OnDesignListener designListener;
+    OnPageChangeListener pageChangeListener;
     Calendar startDate;
     int shiftPosition;
     Calendar curDate;
@@ -356,6 +362,15 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
 
+    public OnPageChangeListener getOnPageListener() {
+        return pageChangeListener;
+    }
+
+    public void setOnPageListener(OnPageChangeListener listener) {
+        this.pageChangeListener = listener;
+    }
+
+
     public void setAdapter(DayPagerAdapter adapter) {
         this.adapter = adapter;
         super.setAdapter(adapter);
@@ -377,6 +392,31 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         adapter = new DayPagerAdapter(this);
         setAdapter(adapter);
         setCurrentItem(0, false);
+
+        addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//                System.out.println("DayViewPager page scrolled to pos: "+position);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                int pos = getLocalPosition(position);
+                Date date = getDate(pos);
+                if (date != null) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    if (pageChangeListener != null) {
+                        pageChangeListener.onPageSeleted(calendar);
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+//                System.out.println("DayViewPager page change state to: "+state);
+            }
+        });
     }
 
     private void initAttributes(AttributeSet attrs, int defStyle) {
@@ -467,7 +507,6 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         int position = super.getCurrentItem();
         return -getShiftPosition() + position;
     }
-
     //endregion
 
     //region Position methods
@@ -595,5 +634,4 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         }
     }
     //endregion
-
 }
