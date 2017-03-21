@@ -50,6 +50,7 @@ public class DayPagerAdapter extends PagerAdapter {
     //endregion
 
     //region Fields
+    public static final int MAX_PAGES = 20000;
     private final int PAGE_CACH_COUNT = 3;
     private final long DAY = 24*60*60*1000;
     private ViewHolder[] dayViews = new ViewHolder[PAGE_CACH_COUNT];
@@ -86,9 +87,15 @@ public class DayPagerAdapter extends PagerAdapter {
         dayViews[innerPosition] = holder;
     }
 
+    public void clear() {
+        for (int i=0; i<PAGE_CACH_COUNT; i++) {
+            dayViews[i] = null;
+        }
+    }
+
     @Override
     public int getCount() {
-        return Integer.MAX_VALUE;
+        return MAX_PAGES;
     }
 
     public int getRealCount() {
@@ -126,7 +133,7 @@ public class DayPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        int innerPos = getInnerPosition(position);
+//        int innerPos = getInnerPosition(position);
 //        if (0<= innerPos && innerPos < PAGE_CACH_COUNT) {
 //            ViewHolder holder = getViewHolder(innerPos);
 //            View view = holder == null? null: holder.getView();
