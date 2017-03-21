@@ -2,13 +2,20 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Base.Theme.AppCompat.Light">
-        <item name="colorPrimary">@color/toolbar</item>
-        <item name="colorPrimaryDark">@color/accent</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorPrimary">@color/toolbar_text</item>
         <item name="actionMenuTextColor">@color/toolbar_text</item>
         <item name="popupTheme">@style/Base.ThemeOverlay.AppCompat.Light</item>
         <item name="colorControlActivated">@color/accent</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="Base.Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="Button">

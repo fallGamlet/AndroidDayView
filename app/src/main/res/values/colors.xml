@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#0f8bde</color>
-    <color name="colorPrimaryDark">#0a5384</color>
+    <color name="colorPrimary">#efefef</color>
+    <color name="colorPrimaryDark">#acacac</color>
     <color name="colorAccent">#8b0fde</color>
     <color name="event_color_01">#26b0b6</color>
     <color name="event_color_02">#f57f68</color>
@@ -11,7 +11,7 @@
     <color name="event_color_06">#9e3ddf</color>
     <color name="toolbar">#efefef</color>
     <color name="toolbar_text">#8f000000</color>
-    <color name="accent">#2789e4</color>
+    <color name="accent">@color/colorAccent</color>
 
     <color name="transparent">#00000000</color>
 

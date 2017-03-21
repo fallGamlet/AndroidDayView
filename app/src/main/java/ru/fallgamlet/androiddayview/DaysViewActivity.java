@@ -1,13 +1,20 @@
 package ru.fallgamlet.androiddayview;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,14 +23,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import ru.fallgamlet.dayview.DayPagerAdapter;
 import ru.fallgamlet.dayview.DayViewPager;
 import ru.fallgamlet.dayview.TimeLineView;
 
 public class DaysViewActivity extends AppCompatActivity {
 
     //region Fields
+    Button dateBtn = null;
     DayViewPager dayViewPager;
     Random random = new Random();
+    Date curDate;
     List<TimeLineView.MinuteInterval> workIntervals = new ArrayList<>(7);
     List<Integer> colors = new ArrayList<>();
     //endregion
@@ -34,11 +44,62 @@ public class DaysViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_days_view);
 
+        dateBtn = (Button) findViewById(R.id.dateBtn);
+        if (dateBtn != null) {
+            dateBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showDatePicker();
+                }
+            });
+        }
+
         dayViewPager = (DayViewPager) findViewById(R.id.dayViewPager);
         dayViewPager.setOnContentListener(getContextListener());
+        dayViewPager.setOnDesignListener(getDesignListener());
         dayViewPager.setFocusable(false);
+
+        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.DAY_OF_YEAR, 13);
+
+        setDate(calendar.getTime());
     }
 
+    private void showDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(curDate);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog = new DatePickerDialog(this, R.style.AppTheme_Dialog, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, day);
+
+                setDate(calendar.getTime());
+            }
+        },year, month, day);
+        dialog.show();
+    }
+
+    private void setDate(Date date) {
+        if (date == null) {
+            return;
+        }
+        curDate = date;
+        if (dateBtn != null) {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+            String title = formatter.format(curDate);
+            dateBtn.setText(title);
+        }
+        if (dayViewPager != null) {
+            dayViewPager.setCurrentItem(date);
+        }
+    }
 
     private void generateWorkTimes() {
         if (workIntervals == null || workIntervals.isEmpty()) {
@@ -180,6 +241,35 @@ public class DaysViewActivity extends AppCompatActivity {
     }
     //endregion
 
+    //region OnDesignListener
+    DayViewPager.OnDesignListener designListener;
+    @NonNull
+    protected DayViewPager.OnDesignListener getDesignListener() {
+        if (designListener == null) {
+            designListener = new DayViewPager.OnDesignListener() {
+                @Override
+                public DateFormat getDayFormat() {
+                    return new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+                }
+
+                @Override
+                public void onDesignDateTitle(@Nullable TextView dayTitleView) {
+                    if (dayTitleView != null) {
+                        Object obj = dayTitleView.getLayoutParams();
+                        dayTitleView.setGravity(GravityCompat.START);
+                        dayTitleView.setPadding(32,16,0,0);
+                    }
+                }
+
+                @Override
+                public void onDesignTimeLineView(@Nullable TimeLineView timeLineView) {
+
+                }
+            };
+        }
+        return designListener;
+    }
+    //endregion
 
     interface OnClickListener {
         void onClick(TimeLineView.IEventHolder holder);
