@@ -4,14 +4,17 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,7 +31,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         private TimeLineView timeLineView;
 
         private Date date;
-        private SimpleDateFormat dateFormatter = new SimpleDateFormat("E, d MMM", Locale.getDefault());
+        private DateFormat dateFormatter;
         //endregion
 
         //region Constructors
@@ -68,11 +71,20 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             refreshDate();
         }
 
-        public SimpleDateFormat getDateFormatter() {
+        @NonNull
+        public static SimpleDateFormat getDefaultFormatter() {
+            return new SimpleDateFormat("E, d MMM", Locale.getDefault());
+        }
+
+        @NonNull
+        public DateFormat getDateFormatter() {
+            if (dateFormatter == null) {
+                dateFormatter = getDefaultFormatter();
+            }
             return dateFormatter;
         }
 
-        public void setDateFormatter(@NonNull SimpleDateFormat formatter) {
+        public void setDateFormatter(DateFormat formatter) {
             dateFormatter = formatter;
             refreshDate();
         }
@@ -90,16 +102,16 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             }
         }
 
-        public void inflateView(Context context) {
+        public void createView(Context context) {
             View view = View.inflate(context, R.layout.layout_day_view, null);
             initView(view);
         }
 
         protected void refreshDate() {
-            if (this.date == null || this.dayTitleView == null || this.dateFormatter == null) {
+            if (this.date == null || this.dayTitleView == null) {
                 return;
             }
-            this.dayTitleView.setText(this.dateFormatter.format(this.date));
+            this.dayTitleView.setText(this.getDateFormatter().format(this.date));
         }
 
         public boolean setAttributes(AttributeSet attrs, int defStyle) {
@@ -120,10 +132,17 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date);
         List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date);
     }
+
+    public interface OnDesignListener {
+        DateFormat getDayFormat();
+        void onDesignDateTitle(@Nullable TextView dayTitleView);
+        void onDesignTimeLineView(@Nullable TimeLineView timeLineView);
+    }
     //endregion
 
     //region Fields
     // Attributes
+    private float attrDensity;
     private float attrHourHeight = 60;
     private float attrHourLineWidth = 1;
     private int attrDisabledTimeColor = Color.parseColor("#22000000");
@@ -136,10 +155,18 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     private int attrHourBackground = Color.TRANSPARENT;
     private int attrMinHour = 0;
     private int attrMaxHour = 24;
+    private float attrDayTextSize = 14;
+    private int attrDayTextColor = Color.DKGRAY;
+    private float attrDayTextPadding = 0;
+    private float attrDayTextPaddingLeft;
+    private float attrDayTextPaddingRight;
+    private float attrDayTextPaddingTop;
+    private float attrDayTextPaddingBottom;
 
 //    InfinitePagerAdapter infAdapter;
     DayPagerAdapter adapter;
     OnContentListener contentListener;
+    OnDesignListener designListener;
     Calendar startDate;
     int shiftPosition;
     Calendar curDate;
@@ -162,17 +189,13 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     //region Getters and Setters attributes
     public int getMinHour() { return attrMinHour; }
     public void setMinHour(int hour) {
-        if (hour < 0) { attrMinHour = 0; }
-        else if (hour > 24) { attrMinHour = 24; }
-        else { attrMinHour = hour; }
+        attrMinHour = hour;
         if (attrMaxHour < attrMinHour) { attrMaxHour = attrMinHour; }
     }
 
     public int getMaxHour() { return attrMaxHour; }
     public void setMaxHour(int hour) {
-        if (hour < 0) { attrMaxHour = 0; }
-        else if (hour > 24) { attrMaxHour = 24; }
-        else { attrMaxHour = hour; }
+        attrMaxHour = hour;
         if (attrMaxHour < attrMinHour) { attrMinHour = attrMaxHour; }
     }
 
@@ -255,6 +278,63 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     public void setHourBackground(int attrHourBackground) {
         this.attrHourBackground = attrHourBackground;
     }
+
+    public float getDayTextSize() {
+        return attrDayTextSize;
+    }
+
+    public void setDayTextSize(float attrDayTextSize) {
+        this.attrDayTextSize = attrDayTextSize;
+    }
+
+    public int getDayTextColor() {
+        return attrDayTextColor;
+    }
+
+    public void setDayTextColor(int attrDayTextColor) {
+        this.attrDayTextColor = attrDayTextColor;
+    }
+
+    public float getDayTextPadding() {
+        return attrDayTextPadding;
+    }
+
+    public void setDayTextPadding(float attrDayTextPadding) {
+        this.attrDayTextPadding = attrDayTextPadding;
+    }
+
+    public float getDayTextPaddingLeft() {
+        return attrDayTextPaddingLeft;
+    }
+
+    public void setDayTextPaddingLeft(float attrDayTextPaddingLeft) {
+        this.attrDayTextPaddingLeft = attrDayTextPaddingLeft;
+    }
+
+    public float getDayTextPaddingRight() {
+        return attrDayTextPaddingRight;
+    }
+
+    public void setDayTextPaddingRight(float attrDayTextPaddingRight) {
+        this.attrDayTextPaddingRight = attrDayTextPaddingRight;
+    }
+
+    public float getDayTextPaddingTop() {
+        return attrDayTextPaddingTop;
+    }
+
+    public void setDayTextPaddingTop(float attrDayTextPaddingTop) {
+        this.attrDayTextPaddingTop = attrDayTextPaddingTop;
+    }
+
+    public float getDayTextPaddingBottom() {
+        return attrDayTextPaddingBottom;
+    }
+
+    public void setDayTextPaddingBottom(float attrDayTextPaddingBottom) {
+        this.attrDayTextPaddingBottom = attrDayTextPaddingBottom;
+    }
+
     //endregion
 
     //region Getters and Setters listeners
@@ -265,6 +345,16 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     public void setOnContentListener(OnContentListener listener) {
         this.contentListener = listener;
     }
+
+
+    public OnDesignListener getOnDesignListener() {
+        return designListener;
+    }
+
+    public void setOnDesignListener(OnDesignListener listener) {
+        this.designListener = listener;
+    }
+
 
     public void setAdapter(DayPagerAdapter adapter) {
         this.adapter = adapter;
@@ -281,7 +371,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     //region Init methods
     protected void init() {
         startDate = Calendar.getInstance();
-        shiftPosition = Integer.MAX_VALUE / 2;
+        shiftPosition = DayPagerAdapter.MAX_PAGES/2;
 
         curDate = (Calendar) startDate.clone();
         adapter = new DayPagerAdapter(this);
@@ -291,31 +381,46 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     private void initAttributes(AttributeSet attrs, int defStyle) {
         // Load attributes
-        final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TimeLineView, defStyle, 0);
         DisplayMetrics dm = getResources().getDisplayMetrics();
+        attrDensity = dm.density;
 
-        attrHourHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourHeight, dm);
-        attrHourLineWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLineWidth, dm);
+        attrHourHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrHourHeight, dm);
+        attrHourLineWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrHourLineWidth, dm);
         attrHourTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourTextSize, dm);
-        attrHourPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPadding, dm);
-        attrHourPaddingLeft = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingLeft, dm);
-        attrHourPaddingRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingRight, dm);
+        attrHourPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrHourPadding, dm);
+        attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
+
+        attrDayTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrDayTextSize, dm);
+        attrDayTextPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrDayTextPadding, dm);
+        attrDayTextPaddingLeft = attrDayTextPaddingRight = attrDayTextPaddingTop = attrDayTextPaddingBottom = attrDayTextPadding;
 
         if (attrs != null) {
+            final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.DayViewPager, defStyle, 0);
             try {
-                setMinHour(a.getInt(R.styleable.TimeLineView_hourMin, attrMinHour));
-                setMaxHour(a.getInt(R.styleable.TimeLineView_hourMax, attrMaxHour));
-                attrHourHeight = a.getDimension(R.styleable.TimeLineView_hourHeight, attrHourHeight);
-                attrHourLineWidth = a.getDimension(R.styleable.TimeLineView_hourLineWidth, attrHourLineWidth);
-                attrHourLineColor = a.getColor(R.styleable.TimeLineView_hourLineColor, attrHourLineColor);
-                attrHourBackground = a.getColor(R.styleable.TimeLineView_hourBackground, attrHourBackground);
-                attrHourTextColor = a.getColor(R.styleable.TimeLineView_hourTextColor, attrHourTextColor);
-                attrHourTextSize = a.getDimension(R.styleable.TimeLineView_hourTextSize, attrHourTextSize);
-                attrHourPadding = a.getDimension(R.styleable.TimeLineView_hourPadding, attrHourPadding);
+                setMinHour(a.getInt(R.styleable.DayViewPager_hourMin, attrMinHour));
+                setMaxHour(a.getInt(R.styleable.DayViewPager_hourMax, attrMaxHour));
+                attrHourHeight = a.getDimension(R.styleable.DayViewPager_hourHeight, attrHourHeight);
+                attrHourLineWidth = a.getDimension(R.styleable.DayViewPager_hourLineWidth, attrHourLineWidth);
+                attrHourLineColor = a.getColor(R.styleable.DayViewPager_hourLineColor, attrHourLineColor);
+                attrHourBackground = a.getColor(R.styleable.DayViewPager_hourBackground, attrHourBackground);
+                attrHourTextColor = a.getColor(R.styleable.DayViewPager_hourTextColor, attrHourTextColor);
+                attrHourTextSize = a.getDimension(R.styleable.DayViewPager_hourTextSize, attrHourTextSize);
+                attrHourPadding = a.getDimension(R.styleable.DayViewPager_hourPadding, attrHourPadding);
                 attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
-                attrHourPaddingLeft = a.getDimension(R.styleable.TimeLineView_hourPaddingLeft, attrHourPaddingLeft);
-                attrHourPaddingRight = a.getDimension(R.styleable.TimeLineView_hourPaddingRight, attrHourPaddingRight);
-                attrDisabledTimeColor = a.getColor(R.styleable.TimeLineView_disabledTimeColor, attrDisabledTimeColor);
+                attrHourPaddingLeft = a.getDimension(R.styleable.DayViewPager_hourPaddingLeft, attrHourPaddingLeft);
+                attrHourPaddingRight = a.getDimension(R.styleable.DayViewPager_hourPaddingRight, attrHourPaddingRight);
+                attrDisabledTimeColor = a.getColor(R.styleable.DayViewPager_disabledTimeColor, attrDisabledTimeColor);
+
+                attrDayTextColor = a.getColor(R.styleable.DayViewPager_dayTextColor, attrDayTextColor);
+                attrDayTextSize = a.getDimension(R.styleable.DayViewPager_dayTextSize, attrDayTextSize);
+                attrDayTextPadding = a.getDimension(R.styleable.DayViewPager_dayTextPadding, attrDayTextPadding);
+                attrDayTextPaddingLeft = attrDayTextPaddingRight = attrDayTextPaddingTop = attrDayTextPaddingBottom = attrDayTextPadding;
+                attrDayTextPaddingLeft = a.getDimension(R.styleable.DayViewPager_dayTextPaddingLeft, attrDayTextPaddingLeft);
+                attrDayTextPaddingRight = a.getDimension(R.styleable.DayViewPager_dayTextPaddingRight, attrDayTextPaddingRight);
+                attrDayTextPaddingTop = a.getDimension(R.styleable.DayViewPager_dayTextPaddingTop, attrDayTextPaddingTop);
+                attrDayTextPaddingBottom = a.getDimension(R.styleable.DayViewPager_dayTextPaddingBottom, attrDayTextPaddingBottom);
+            } catch (Exception e) {
+                Log.e("DayViewpager", e.toString());
             } finally {
                 a.recycle();
             }
@@ -362,6 +467,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         int position = super.getCurrentItem();
         return -getShiftPosition() + position;
     }
+
     //endregion
 
     //region Position methods
@@ -390,7 +496,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     protected int getLocalPosition(@NonNull Date date) {
         long DAY = 24*60*60*1000;
-        long shiftDays = startDate.getTimeInMillis()/DAY - date.getTime()/DAY;
+        long shiftDays = date.getTime()/DAY - startDate.getTimeInMillis()/DAY;
         return (int)shiftDays;
     }
 
@@ -404,7 +510,16 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     @Override
     public DayPagerAdapter.ViewHolder onCreateViewHolder(int position) {
         DayViewHolder holder = new DayViewHolder();
-        holder.inflateView(getContext());
+        holder.createView(getContext());
+
+        TextView textView = holder.dayTitleView;
+        if (textView != null) {
+            //Configure date title
+            textView.setTextSize(attrDayTextSize / attrDensity);
+            textView.setTextColor(attrDayTextColor);
+            textView.setPadding((int)attrDayTextPaddingLeft, (int)attrDayTextPaddingTop, (int)attrDayTextPaddingRight, (int)attrDayTextPaddingBottom);
+        }
+
         TimeLineView timeLineView = holder.timeLineView;
         if (timeLineView != null) {
             // Configure TimeLineView
@@ -419,7 +534,15 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             timeLineView.setDisabledTimeColor(attrDisabledTimeColor);
             timeLineView.setHourTextColor(attrHourTextColor);
             timeLineView.setHourTextSize(attrHourTextSize);
+            timeLineView.invalidate();
         }
+
+        if (designListener != null) {
+            holder.setDateFormatter(designListener.getDayFormat());
+            designListener.onDesignDateTitle(textView);
+            designListener.onDesignTimeLineView(timeLineView);
+        }
+
         return holder;
     }
 
