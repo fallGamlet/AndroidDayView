@@ -401,7 +401,17 @@ public class TimeLineView extends FrameLayout {
             if (onTimeSelectListener != null) {
                 float y = e.getY();
                 int minute = getMinutesByPositionY(y);
-                onTimeSelectListener.onTimePress(TimeLineView.this, minute);
+                boolean checkDisabled = false;
+                for (MinuteInterval disInterval : getDisabledTimes()) {
+                    if (disInterval.isCollide(minute, minute)) {
+                        checkDisabled = true;
+                        break;
+                    }
+                }
+
+                if (!checkDisabled) {
+                    onTimeSelectListener.onTimePress(TimeLineView.this, minute);
+                }
             }
             return super.onSingleTapConfirmed(e);
         }
@@ -411,7 +421,16 @@ public class TimeLineView extends FrameLayout {
             if (onTimeSelectListener != null) {
                 float y = e.getY();
                 int minute = getMinutesByPositionY(y);
-                onTimeSelectListener.onTimeLongPressed(TimeLineView.this, minute);
+                boolean checkDisabled = false;
+                for (MinuteInterval disInterval : getDisabledTimes()) {
+                    if (disInterval.isCollide(minute, minute)) {
+                        checkDisabled = true;
+                        break;
+                    }
+                }
+                if (!checkDisabled) {
+                    onTimeSelectListener.onTimeLongPressed(TimeLineView.this, minute);
+                }
             }
             super.onLongPress(e);
         }
@@ -477,6 +496,9 @@ public class TimeLineView extends FrameLayout {
 
     public void setHourLineWidth(float attrHourLineWidth) {
         this.attrHourLineWidth = attrHourLineWidth;
+        if (hourLinePaint != null) {
+            hourLinePaint.setStrokeWidth(attrHourLineWidth);
+        }
     }
 
     public int getDisabledTimeColor() {
@@ -493,6 +515,9 @@ public class TimeLineView extends FrameLayout {
 
     public void setHourLineColor(int attrHourLineColor) {
         this.attrHourLineColor = attrHourLineColor;
+        if (hourLinePaint != null) {
+            hourLinePaint.setColor(attrHourLineColor);
+        }
     }
 
     public int getHourTextColor() {
@@ -501,6 +526,9 @@ public class TimeLineView extends FrameLayout {
 
     public void setHourTextColor(int attrHourTextColor) {
         this.attrHourTextColor = attrHourTextColor;
+        if (hourTextPaint != null) {
+            hourTextPaint.setColor(attrHourTextColor);
+        }
     }
 
     public float getHourTextSize() {
@@ -509,6 +537,9 @@ public class TimeLineView extends FrameLayout {
 
     public void setHourTextSize(float attrHourTextSize) {
         this.attrHourTextSize = attrHourTextSize;
+        if (hourTextPaint != null) {
+            hourTextPaint.setTextSize(attrHourTextSize);
+        }
     }
 
     public float getHourPadding() {
@@ -541,6 +572,9 @@ public class TimeLineView extends FrameLayout {
 
     public void setHourBackground(int attrHourBackground) {
         this.attrHourBackground = attrHourBackground;
+        if (hourBgPaint != null) {
+            hourBgPaint.setColor(attrHourBackground);
+        }
     }
 
     public void setOnTimeSelectListener(IOnTimeSelectListener listener) {
@@ -665,6 +699,7 @@ public class TimeLineView extends FrameLayout {
             attrHourTextColor = a.getColor(R.styleable.TimeLineView_hourTextColor, attrHourTextColor);
             attrHourTextSize = a.getDimension(R.styleable.TimeLineView_hourTextSize, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourTextSize, dm));
             attrHourPadding = a.getDimension(R.styleable.TimeLineView_hourPadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPadding, dm));
+
             attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
             attrHourPaddingLeft = a.getDimension(R.styleable.TimeLineView_hourPaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingLeft, dm));
             attrHourPaddingRight = a.getDimension(R.styleable.TimeLineView_hourPaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingRight, dm));
