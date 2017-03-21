@@ -11,6 +11,13 @@
     <attr name="hourPaddingLeft" format="dimension"/>
     <attr name="hourPaddingRight" format="dimension"/>
     <attr name="disabledTimeColor" format="color"/>
+    <attr name="dayTextColor" format="color"/>
+    <attr name="dayTextSize" format="dimension"/>
+    <attr name="dayTextPadding" format="dimension"/>
+    <attr name="dayTextPaddingLeft" format="dimension"/>
+    <attr name="dayTextPaddingRight" format="dimension"/>
+    <attr name="dayTextPaddingTop" format="dimension"/>
+    <attr name="dayTextPaddingBottom" format="dimension"/>
 
     <declare-styleable name="TimeLineView">
         <attr name="hourMin"/>
@@ -40,5 +47,12 @@
         <attr name="hourPaddingLeft"/>
         <attr name="hourPaddingRight"/>
         <attr name="disabledTimeColor"/>
+        <attr name="dayTextColor" />
+        <attr name="dayTextSize" />
+        <attr name="dayTextPadding" />
+        <attr name="dayTextPaddingLeft" />
+        <attr name="dayTextPaddingRight" />
+        <attr name="dayTextPaddingTop" />
+        <attr name="dayTextPaddingBottom" />
     </declare-styleable>
 </resources>
