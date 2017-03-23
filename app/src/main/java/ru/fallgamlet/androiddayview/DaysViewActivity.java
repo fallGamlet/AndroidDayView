@@ -117,6 +117,10 @@ public class DaysViewActivity extends AppCompatActivity {
         }
         if (dayViewPager != null) {
             dayViewPager.setCurrentItem(date);
+//            dayViewPager.notifyDataChanged();
+//            Date d = dayViewPager.getCurrentDate();
+//            System.out.println(d);
+
         }
     }
 

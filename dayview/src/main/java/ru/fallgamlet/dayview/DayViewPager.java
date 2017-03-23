@@ -146,6 +146,8 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     //endregion
 
     //region Fields
+    private static long DAY = 24*60*60*1000;
+
     // Attributes
     private float attrDensity;
     private float attrHourHeight = 60;
@@ -175,7 +177,6 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     OnPageChangeListener pageChangeListener;
     Calendar startDate;
     int shiftPosition;
-    Calendar curDate;
     //endregion
 
     //region Constructors
@@ -386,9 +387,13 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     //region Init methods
     protected void init() {
         startDate = Calendar.getInstance();
+        startDate.set(Calendar.HOUR_OF_DAY, 0);
+        startDate.set(Calendar.MINUTE, 0);
+        startDate.set(Calendar.SECOND, 0);
+        startDate.set(Calendar.MILLISECOND, 0);
+
         shiftPosition = DayPagerAdapter.MAX_PAGES/2;
 
-        curDate = (Calendar) startDate.clone();
         adapter = new DayPagerAdapter(this);
         setAdapter(adapter);
         setCurrentItem(0, false);
@@ -505,7 +510,17 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     @Override
     public int getCurrentItem() {
         int position = super.getCurrentItem();
-        return -getShiftPosition() + position;
+        return getLocalPosition(position);
+    }
+
+    public Calendar getCurrentCalendar() {
+        int pos = getCurrentItem();
+        Calendar calendar = getCalendar(pos);
+        return calendar;
+    }
+
+    public Date getCurrentDate() {
+        return getCurrentCalendar().getTime();
     }
     //endregion
 
@@ -515,7 +530,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
     private int getAbsolutePosition(int position) {
-        return shiftPosition + position;
+        return position + shiftPosition;
     }
 
     private int getLocalPosition(int absolutePosition) {
@@ -524,7 +539,6 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     protected Calendar getCalendar(int localPosition) {
         Calendar calendar = (Calendar) startDate.clone();
-//        localPosition -= getShiftPosition();
         calendar.add(Calendar.DAY_OF_YEAR, localPosition);
         return calendar;
     }
@@ -534,15 +548,31 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
     protected int getLocalPosition(@NonNull Date date) {
-        long DAY = 24*60*60*1000;
-        long d = date.getTime()/DAY;
-        long dStart = startDate.getTime().getTime()/DAY;
-        long shiftDays = d - dStart;
-        return (int)shiftDays;
+        Calendar dayDate = Calendar.getInstance();
+        dayDate.setTime(date);
+        return getLocalPosition(dayDate);
     }
 
     protected int getLocalPosition(@NonNull Calendar date) {
-        return getLocalPosition(date.getTime());
+        Calendar dayDate = (Calendar) date.clone();
+        dayDate.set(Calendar.HOUR_OF_DAY, 0);
+        dayDate.set(Calendar.MINUTE, 0);
+        dayDate.set(Calendar.SECOND, 0);
+        dayDate.set(Calendar.MILLISECOND, 0);
+
+        long d = dayDate.getTimeInMillis() / DAY;
+        long dStart = startDate.getTimeInMillis() / DAY;
+        long shiftDays = d - dStart;
+        return (int)shiftDays;
+    }
+    //endregion
+
+    //region Notify methods
+    public void notifyDataChanged() {
+        if (getAdapter() != null) {
+            getAdapter().notifyDataSetChanged();
+            setCurrentItem(getCurrentItem());
+        }
     }
     //endregion
 

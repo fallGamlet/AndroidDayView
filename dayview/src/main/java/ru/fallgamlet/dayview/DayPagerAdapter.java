@@ -108,6 +108,12 @@ public class DayPagerAdapter extends PagerAdapter {
     }
 
     @Override
+    public int getItemPosition(Object object) {
+//        return super.getItemPosition(object);
+        return POSITION_NONE;
+    }
+
+    @Override
     public Object instantiateItem(ViewGroup container, int position) {
         int innerPos = getInnerPosition(position);
 
@@ -141,5 +147,11 @@ public class DayPagerAdapter extends PagerAdapter {
 //                container.removeView(view);
 //            }
 //        }
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+
     }
 }
