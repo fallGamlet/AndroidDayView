@@ -519,7 +519,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
     private int getLocalPosition(int absolutePosition) {
-        return -shiftPosition + absolutePosition;
+        return absolutePosition - shiftPosition;
     }
 
     protected Calendar getCalendar(int localPosition) {
@@ -535,7 +535,9 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     protected int getLocalPosition(@NonNull Date date) {
         long DAY = 24*60*60*1000;
-        long shiftDays = date.getTime()/DAY - startDate.getTimeInMillis()/DAY;
+        long d = date.getTime()/DAY;
+        long dStart = startDate.getTime().getTime()/DAY;
+        long shiftDays = d - dStart;
         return (int)shiftDays;
     }
 
@@ -606,12 +608,8 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         if (contentListener != null) {
             minHour = contentListener.getMinHour(calendar);
             maxHour = contentListener.getMaxHour(calendar);
-            if (minHour < 0) { minHour = attrMinHour;}
-            if (minHour < 0) { minHour = 0;}
-            if (minHour > 24) { minHour = 24;}
 
-            if (maxHour < minHour || maxHour > 24 ) { maxHour = attrMaxHour; }
-            if (maxHour < minHour || maxHour > 24 ) { maxHour = minHour; }
+            if (maxHour < minHour) { maxHour = 1+minHour; }
 
             disabledIntervals = contentListener.getDisabledIntervals(calendar);
             coloredIntervals = contentListener.getColoredIntervals(calendar);
