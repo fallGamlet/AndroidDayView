@@ -31,6 +31,7 @@ public class DaysViewActivity extends AppCompatActivity {
 
     //region Fields
     Button dateBtn = null;
+    Button refreshBtn = null;
     DayViewPager dayViewPager;
     Random random = new Random();
     Date curDate;
@@ -50,6 +51,18 @@ public class DaysViewActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     showDatePicker();
+                }
+            });
+        }
+
+        refreshBtn = (Button) findViewById(R.id.refreshBtn);
+        if (refreshBtn != null) {
+            refreshBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (dayViewPager != null) {
+                        dayViewPager.notifyDataChanged();
+                    }
                 }
             });
         }
@@ -117,9 +130,6 @@ public class DaysViewActivity extends AppCompatActivity {
         }
         if (dayViewPager != null) {
             dayViewPager.setCurrentItem(date);
-//            dayViewPager.notifyDataChanged();
-//            Date d = dayViewPager.getCurrentDate();
-//            System.out.println(d);
 
         }
     }
