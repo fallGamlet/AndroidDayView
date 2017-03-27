@@ -569,9 +569,13 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     //region Notify methods
     public void notifyDataChanged() {
-        if (getAdapter() != null) {
-            getAdapter().notifyDataSetChanged();
-            setCurrentItem(getCurrentItem());
+        PagerAdapter adapter = getAdapter();
+        if (adapter != null) {
+            int pos = getCurrentItem();
+            pos = getAbsolutePosition(pos);
+            adapter.instantiateItem(this, pos);
+            adapter.instantiateItem(this, pos-1);
+            adapter.instantiateItem(this, pos+1);
         }
     }
     //endregion
@@ -661,5 +665,27 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             timeLineView.setData(eventHolders);
         }
     }
+
+    @Override
+    public void onUnbindData(DayPagerAdapter.ViewHolder holder, int position) {
+        if (holder == null || !(holder instanceof DayViewHolder)) {
+            return;
+        }
+
+        DayViewHolder dayHolder = (DayViewHolder) holder;
+        TextView titleView = dayHolder.getDayTitleView();
+        TimeLineView timeLineView = dayHolder.getTimeLineView();
+
+        if (titleView != null) {
+            titleView.setText(null);
+        }
+
+        if (timeLineView != null) {
+            timeLineView.clear();
+            timeLineView.getColoredIntervals().clear();
+            timeLineView.getDisabledTimes().clear();
+        }
+    }
+
     //endregion
 }

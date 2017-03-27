@@ -46,6 +46,7 @@ public class DayPagerAdapter extends PagerAdapter {
         @NonNull
         ViewHolder onCreateViewHolder(int position);
         void onBindData(ViewHolder holder, int position);
+        void onUnbindData(ViewHolder holder, int position);
     }
     //endregion
 
@@ -69,7 +70,6 @@ public class DayPagerAdapter extends PagerAdapter {
     private int getInnerPosition(int position) {
         int localPos = position % PAGE_CACH_COUNT;
         if (localPos < 0) { localPos += PAGE_CACH_COUNT; }
-//        return ((position % PAGE_CACH_COUNT) + PAGE_CACH_COUNT) % PAGE_CACH_COUNT;
         return localPos;
     }
 
@@ -107,11 +107,10 @@ public class DayPagerAdapter extends PagerAdapter {
         return view != null && view.equals(object);
     }
 
-    @Override
-    public int getItemPosition(Object object) {
-//        return super.getItemPosition(object);
-        return POSITION_NONE;
-    }
+//    @Override
+//    public int getItemPosition(Object object) {
+//        return POSITION_NONE;
+//    }
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
@@ -123,30 +122,22 @@ public class DayPagerAdapter extends PagerAdapter {
             setViewHolder(holder, innerPos);
             container.addView(holder.getView(), 0);
         }
+
         listener.onBindData(holder, position);
         if (holder.getView() != null) {
-//            holder.getView().setVisibility(View.VISIBLE);
             holder.getView().invalidate();
         }
 
         if (container == null) { return null; }
 
-//        container.removeView(holder.getView());
-//        container.addView(holder.getView(), 0);
         return holder.getView();
-//        return super.instantiateItem(container, position);
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-//        int innerPos = getInnerPosition(position);
-//        if (0<= innerPos && innerPos < PAGE_CACH_COUNT) {
-//            ViewHolder holder = getViewHolder(innerPos);
-//            View view = holder == null? null: holder.getView();
-//            if (view != null) {
-//                container.removeView(view);
-//            }
-//        }
+        if (object instanceof ViewHolder && listener != null) {
+            listener.onUnbindData(((ViewHolder) object), position);
+        }
     }
 
     @Override
