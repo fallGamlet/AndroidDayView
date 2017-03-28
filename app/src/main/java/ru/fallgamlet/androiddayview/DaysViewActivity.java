@@ -5,9 +5,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -71,12 +73,18 @@ public class DaysViewActivity extends AppCompatActivity {
         dayViewPager.setOnContentListener(getContextListener());
         dayViewPager.setOnDesignListener(getDesignListener());
         dayViewPager.setOnPageListener(getOnPageChangeListener());
+        dayViewPager.setOnDateTimeSelectListener(getDateTimeSelectListener());
         dayViewPager.setFocusable(false);
 
         Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.DAY_OF_YEAR, 13);
 
         setDate(calendar.getTime());
+    }
+
+    private void showSnackbar(String msg) {
+        if (dayViewPager != null) {
+            Snackbar.make(dayViewPager, msg, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void showDatePicker() {
@@ -209,21 +217,45 @@ public class DaysViewActivity extends AppCompatActivity {
         int maxMinute = workTime.getEnd()*hour;
 
         for (int i=0; i< count; i++) {
-            int start = minMinute + random.nextInt(maxMinute-minMinute);
+            int startMinute = minMinute + random.nextInt(maxMinute-minMinute);
             int minLength = 20;
-            int length = maxMinute - start - minLength;
+            int length = maxMinute - startMinute - minLength;
             length = length <= 0? minLength: minLength+random.nextInt(length);
             if (length > 2*hour) { length = 2*hour; }
-            int end = start + length;
 
             String title = "title";
             String subtitle = "subtitle";
-            TimeLineView.MinuteInterval interval = new TimeLineView.MinuteInterval(start, end);
 
-            MyEventHolder holder = new MyEventHolder(DaysViewActivity.this, title, subtitle, interval);
+            Calendar calendar = (Calendar)date.clone();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            calendar.add(Calendar.MINUTE, startMinute);
+            final Date startDate = calendar.getTime();
+            calendar.add(Calendar.MINUTE, length);
+            final Date endDate = calendar.getTime();
+
+
+            MyEventHolder holder = new MyEventHolder(DaysViewActivity.this, title, subtitle, startDate, endDate);
             int bgColor = getRandomColor();
             holder.getView().setBackgroundColor(bgColor);
             holderList.add(holder);
+
+            holder.setListener(new OnClickListener() {
+                @Override
+                public void onClick(TimeLineView.IEventHolder holder) {
+                    MyEventHolder myholder = ((MyEventHolder) holder);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    String text = "Select item\n "+
+                            dateFormat.format(myholder.getStart()) + " " +
+                            timeFormat.format(myholder.getStart()) + " - " +
+                            timeFormat.format(myholder.getEnd());
+                    showSnackbar(text);
+                }
+            });
         }
 
         return holderList;
@@ -234,43 +266,45 @@ public class DaysViewActivity extends AppCompatActivity {
     DayViewPager.OnContentListener contextListener;
     @NonNull
     protected DayViewPager.OnContentListener getContextListener() {
-        return new DayViewPager.OnContentListener() {
-
-            @Override
-            public int getMinHour(Calendar date) {
-                int hour = -1;
-                if (date != null) {
-                     int weekDay = date.get(Calendar.DAY_OF_WEEK);
-                    hour = getWorkTime(weekDay).getStart();
+        if (contextListener == null) {
+            contextListener = new DayViewPager.OnContentListener() {
+                @Override
+                public int getMinHour(Calendar date) {
+                    int hour = -1;
+                    if (date != null) {
+                        int weekDay = date.get(Calendar.DAY_OF_WEEK);
+                        hour = getWorkTime(weekDay).getStart();
+                    }
+                    return hour;
                 }
-                return hour;
-            }
 
-            @Override
-            public int getMaxHour(Calendar date) {
-                int hour = -1;
-                if (date != null) {
-                    int weekDay = date.get(Calendar.DAY_OF_WEEK);
-                    hour = getWorkTime(weekDay).getEnd();
+                @Override
+                public int getMaxHour(Calendar date) {
+                    int hour = -1;
+                    if (date != null) {
+                        int weekDay = date.get(Calendar.DAY_OF_WEEK);
+                        hour = getWorkTime(weekDay).getEnd();
+                    }
+                    return hour;
                 }
-                return hour;
-            }
 
-            @Override
-            public List<TimeLineView.IEventHolder> getEvents(Calendar date) {
-                return generateEventHolders(date);
-            }
+                @Override
+                public List<TimeLineView.IEventHolder> getEvents(Calendar date) {
+                    return generateEventHolders(date);
+                }
 
-            @Override
-            public List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date) {
-                return null;
-            }
+                @Override
+                public List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date) {
+                    return null;
+                }
 
-            @Override
-            public List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date) {
-                return null;
-            }
-        };
+                @Override
+                public List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date) {
+                    return null;
+                }
+            };
+        }
+        return contextListener;
     }
     //endregion
 
@@ -311,7 +345,7 @@ public class DaysViewActivity extends AppCompatActivity {
         if (onPageChangeListener == null) {
             onPageChangeListener = new DayViewPager.OnPageChangeListener() {
                 @Override
-                public void onPageSeleted(Calendar selectedDate) {
+                public void onPageSelected(Calendar selectedDate) {
                     setDate(selectedDate==null? null: selectedDate.getTime());
                 }
             };
@@ -320,14 +354,41 @@ public class DaysViewActivity extends AppCompatActivity {
     }
     //endregion
 
+    //region OnDateTimeSelectListener
+    DayViewPager.OnDateTimeSelectListener onDateTimeSelectListener;
+    @NonNull
+    DayViewPager.OnDateTimeSelectListener getDateTimeSelectListener() {
+        if (onDateTimeSelectListener == null) {
+            onDateTimeSelectListener = new DayViewPager.OnDateTimeSelectListener() {
+                @Override
+                public void onTimePress(Object sender, Calendar date) {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd  HH:mm", Locale.getDefault());
+                    String dateStr = format.format(date.getTime());
+                    showSnackbar(dateStr);
+                }
+
+                @Override
+                public void onTimeLongPressed(Object sender, Calendar date) {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd  HH:mm", Locale.getDefault());
+                    String dateStr = format.format(date.getTime());
+                    showSnackbar(dateStr);
+                }
+            };
+        }
+        return onDateTimeSelectListener;
+    }
+    //endregion
+
     interface OnClickListener {
         void onClick(TimeLineView.IEventHolder holder);
     }
 
     public static class  MyEventHolder implements TimeLineView.IEventHolder, View.OnClickListener {
-        private TimeLineView.MinuteInterval timeInterval;
         private String title;
         private String subtitle;
+        private Date start, end;
+        private TimeLineView.MinuteInterval timeInterval;
+
         private View rootView;
         private TextView startView;
         private TextView endView;
@@ -340,9 +401,9 @@ public class DaysViewActivity extends AppCompatActivity {
             initView(context);
         }
 
-        public MyEventHolder(Context context, String title, String subtitle, TimeLineView.MinuteInterval timeInterval) {
+        public MyEventHolder(Context context, String title, String subtitle, Date start, Date end) {
             initView(context);
-            initData(title, subtitle, timeInterval);
+            initData(title, subtitle, start, end);
         }
 
         //region Getters and Setters
@@ -361,6 +422,22 @@ public class DaysViewActivity extends AppCompatActivity {
 
         public void setTitle(String title) {
             this.title = title;
+        }
+
+        public Date getStart() {
+            return start;
+        }
+
+        public void setStart(Date start) {
+            this.start = start;
+        }
+
+        public Date getEnd() {
+            return end;
+        }
+
+        public void setEnd(Date end) {
+            this.end = end;
         }
 
         public void setListener(OnClickListener listener) {
@@ -385,11 +462,25 @@ public class DaysViewActivity extends AppCompatActivity {
 
         @Override
         public TimeLineView.MinuteInterval getTimeInterval() {
-            return timeInterval;
-        }
+            if (start == null || end == null) {
+                return null;
+            }
+            if (timeInterval == null) {
+                timeInterval = new TimeLineView.MinuteInterval();
+            }
 
-        public void setTimeInterval(TimeLineView.MinuteInterval timeInterval) {
-            this.timeInterval = timeInterval;
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(start);
+
+            int startMinute = calendar.get(Calendar.MINUTE) + calendar.get(Calendar.HOUR_OF_DAY)*60;
+
+            calendar.setTime(end);
+
+            int endMinute = calendar.get(Calendar.MINUTE) + calendar.get(Calendar.HOUR_OF_DAY)*60;
+
+            timeInterval.setData(startMinute, endMinute);
+
+            return timeInterval;
         }
 
         public SimpleDateFormat getTimeFormatter() {
@@ -410,10 +501,11 @@ public class DaysViewActivity extends AppCompatActivity {
             setView(view);
         }
 
-        public void initData(String title, String subtitle, TimeLineView.MinuteInterval timeInterval) {
+        public void initData(String title, String subtitle, Date start, Date end) {
             this.title = title;
             this.subtitle = subtitle;
-            this.timeInterval = timeInterval;
+            this.start = start;
+            this.end = end;
             notifyDataChanged();
         }
 
@@ -428,7 +520,9 @@ public class DaysViewActivity extends AppCompatActivity {
 
             String startStr = null
                     , endStr = null;
-            if (timeInterval != null) {
+
+            TimeLineView.MinuteInterval timeInterval = getTimeInterval();
+            if (getTimeInterval() != null) {
                 int startMinute = timeInterval.getStart();
                 int endMinute = timeInterval.getEnd();
                 Calendar calendar = Calendar.getInstance();
@@ -459,7 +553,6 @@ public class DaysViewActivity extends AppCompatActivity {
             String str = timeInterval==null? "": "["+timeInterval.toString()+"]";
             return str+" "+title+" "+subtitle;
         }
-
         //endregion
     }
 
