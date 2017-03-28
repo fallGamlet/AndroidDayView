@@ -18,7 +18,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -127,7 +126,12 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
     public interface OnPageChangeListener {
-        void onPageSeleted(Calendar selectedDate);
+        void onPageSelected(Calendar selectedDate);
+    }
+
+    public interface OnDateTimeSelectListener {
+        void onTimePress(Object sender, Calendar date);
+        void onTimeLongPressed(Object sender, Calendar date);
     }
 
     public interface OnContentListener {
@@ -170,11 +174,11 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     private float attrDayTextPaddingTop;
     private float attrDayTextPaddingBottom;
 
-//    InfinitePagerAdapter infAdapter;
     DayPagerAdapter adapter;
     OnContentListener contentListener;
     OnDesignListener designListener;
     OnPageChangeListener pageChangeListener;
+    OnDateTimeSelectListener dateTimeSelectListener;
     Calendar startDate;
     int shiftPosition;
     //endregion
@@ -372,6 +376,15 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     }
 
 
+    public OnDateTimeSelectListener getOnDateTimeSelectListener() {
+        return this.dateTimeSelectListener;
+    }
+
+    public void setOnDateTimeSelectListener(OnDateTimeSelectListener listener) {
+        this.dateTimeSelectListener = listener;
+    }
+
+
     public void setAdapter(DayPagerAdapter adapter) {
         this.adapter = adapter;
         super.setAdapter(adapter);
@@ -412,7 +425,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(date);
                     if (pageChangeListener != null) {
-                        pageChangeListener.onPageSeleted(calendar);
+                        pageChangeListener.onPageSelected(calendar);
                     }
                 }
             }
@@ -584,7 +597,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     @NonNull
     @Override
     public DayPagerAdapter.ViewHolder onCreateViewHolder(int position) {
-        DayViewHolder holder = new DayViewHolder();
+        final DayViewHolder holder = new DayViewHolder();
         holder.createView(getContext());
 
         TextView textView = holder.dayTitleView;
@@ -610,6 +623,37 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             timeLineView.setHourTextColor(attrHourTextColor);
             timeLineView.setHourTextSize(attrHourTextSize);
             timeLineView.invalidate();
+            timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
+                @Override
+                public void onTimePress(Object sender, int minute) {
+                    if (DayViewPager.this.dateTimeSelectListener != null) {
+                        Calendar date = Calendar.getInstance();
+                        date.setTime(holder.getDate());
+                        date.set(Calendar.HOUR_OF_DAY, 0);
+                        date.set(Calendar.MINUTE, 0);
+                        date.set(Calendar.SECOND, 0);
+                        date.set(Calendar.MILLISECOND, 0);
+                        date.add(Calendar.MINUTE, minute);
+
+                        DayViewPager.this.dateTimeSelectListener.onTimePress(sender, date);
+                    }
+                }
+
+                @Override
+                public void onTimeLongPressed(Object sender, int minute) {
+                    if (DayViewPager.this.dateTimeSelectListener != null) {
+                        Calendar date = Calendar.getInstance();
+                        date.setTime(holder.getDate());
+                        date.set(Calendar.HOUR_OF_DAY, 0);
+                        date.set(Calendar.MINUTE, 0);
+                        date.set(Calendar.SECOND, 0);
+                        date.set(Calendar.MILLISECOND, 0);
+                        date.add(Calendar.MINUTE, minute);
+
+                        DayViewPager.this.dateTimeSelectListener.onTimeLongPressed(sender, date);
+                    }
+                }
+            });
         }
 
         if (designListener != null) {
@@ -637,7 +681,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         List<TimeLineView.ColoredInterval> coloredIntervals = null;
         List<TimeLineView.IEventHolder> eventHolders = null;
 
-        ((DayViewHolder) holder).setDate(calendar.getTime());
+        dayHolder.setDate(calendar.getTime());
 
         if (contentListener != null) {
             minHour = contentListener.getMinHour(calendar);
