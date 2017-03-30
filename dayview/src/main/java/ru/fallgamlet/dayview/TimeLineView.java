@@ -853,11 +853,8 @@ public class TimeLineView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-//        super.onLayout(changed, left, top, right, bottom);
-        if (changed) {
-            layoutChanged();
-//            invalidate();
-        }
+        super.onLayout(changed, left, top, right, bottom);
+        layoutEventsChange();
     }
 
     @Override
@@ -895,7 +892,7 @@ public class TimeLineView extends FrameLayout {
     }
     //endregion
 
-    //region Clusters
+    //region Clusters methods
     private List<Cluster> clusters = new ArrayList<>();
     public <T extends IEventHolder> boolean add(T holder) {
         if (holder == null || holder.getTimeInterval() == null || !holder.getTimeInterval().isValid()) {
@@ -939,7 +936,7 @@ public class TimeLineView extends FrameLayout {
         cluster.remathViewRect(offsetX, offsetY, eventsWidth, attrHourHeight);
     }
 
-    public void layoutChanged() {
+    public void layoutEventsChange() {
         for (Cluster cluster: clusters) {
             reinitEventsRect(cluster);
         }
