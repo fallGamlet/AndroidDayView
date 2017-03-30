@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -330,7 +331,11 @@ public class DaysViewActivity extends AppCompatActivity {
 
                 @Override
                 public void onDesignTimeLineView(@Nullable TimeLineView timeLineView) {
+                    if (timeLineView == null) {
+                        return;
+                    }
 
+//                    timeLineView.requestLayout();
                 }
             };
         }
@@ -379,6 +384,7 @@ public class DaysViewActivity extends AppCompatActivity {
     }
     //endregion
 
+    //region Sub classes and interfaces
     interface OnClickListener {
         void onClick(TimeLineView.IEventHolder holder);
     }
@@ -555,5 +561,5 @@ public class DaysViewActivity extends AppCompatActivity {
         }
         //endregion
     }
-
+    //endregion
 }

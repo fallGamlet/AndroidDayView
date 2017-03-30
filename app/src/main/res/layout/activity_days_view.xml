@@ -35,25 +35,25 @@
             android:layout_height="wrap_content"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:text="Refresh"/>
-
+            android:text="@string/label_refresh"/>
 
     </LinearLayout>
 
-
-
-    <ru.fallgamlet.dayview.DayViewPager android:id="@+id/dayViewPager"
+    <ru.fallgamlet.dayview.DayViewPager
+        android:id="@+id/dayViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#FFF"
-        app:hourHeight="50dp"
-        app:hourTextSize="12sp"
-        app:hourMin="6"
-        app:hourMax="22"
-        app:hourLineWidth="0.5dp"
+        app:dayTextColor="#555"
+        app:dayTextSize="16sp"
         app:dayTextPadding="8dp"
         app:dayTextPaddingBottom="0dp"
-        app:dayTextColor="#555"
-        app:dayTextSize="16sp"/>
+        app:hourTextColor="#555"
+        app:hourTextSize="12sp"
+        app:hourLineWidth="0.3dp"
+        app:hourHeight="50dp"
+        app:hourMin="0"
+        app:hourMax="24"
+        />
 
 </LinearLayout>

@@ -5,4 +5,5 @@
     <string name="action_day_view">Day view</string>
     <string name="title_activity_dayview">Day view</string>
     <string name="title_activity_daysview">Days view</string>
+    <string name="label_refresh">Refresh</string>
 </resources>

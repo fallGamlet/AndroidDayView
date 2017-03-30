@@ -309,25 +309,28 @@ public class TimeLineView extends FrameLayout {
             return mi;
         }
 
-        public void remathViewRect(float offsetLeft, float width, float offsetTop, float hourHeight) {
+        public void remathViewRect(float offsetLeft, float offsetTop, float width, float hourHeight) {
             if (isEmpty()) { return; }
             int count = getColumns();
             float itemWidth = width / count;
             int colNum = 0;
             for (List<IEventHolder> column : columns) {
                 int left = (int)(colNum*itemWidth + offsetLeft);
+                int right = (int) (left + itemWidth);
+                int top, bottom;
                 for (IEventHolder item: column) {
                     View view = item.getView();
                     if (view != null) {
                         try {
                             float hoursStart = item.getTimeInterval().getStart() / 60.0f;
                             float hoursEnd = item.getTimeInterval().getEnd() / 60.0f;
-                            int top = (int) (offsetTop + hoursStart*hourHeight);
-                            int bottom = top + (int)((hoursEnd-hoursStart)*hourHeight);
-                            int right = (int) (left + itemWidth);
+                            top = (int) (offsetTop + hoursStart*hourHeight);
+                            bottom = top + (int)((hoursEnd-hoursStart)*hourHeight);
+
+//                            view.invalidate();
                             view.layout(left, top, right, bottom);
                         } catch (Exception ignored) {
-//                            view.setVisibility(View.GONE);
+                            view.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -353,6 +356,9 @@ public class TimeLineView extends FrameLayout {
     //endregion
 
     //region Fields
+    private final List<String> hourTextList = new ArrayList<>(24);
+    float hourColWidth = 0;
+
     // Attributes
     private float attrHourHeight = 60;
     private float attrHourLineWidth = 1;
@@ -685,6 +691,14 @@ public class TimeLineView extends FrameLayout {
 
     //region Init methods
     private void init(AttributeSet attrs, int defStyle) {
+        initAttributes(attrs, defStyle);
+        initGestureDetector();
+        initPaints();
+        initHourTextList();
+        initMinimumHeight();
+    }
+
+    private void initAttributes(AttributeSet attrs, int defStyle) {
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TimeLineView, defStyle, 0);
         DisplayMetrics dm = getResources().getDisplayMetrics();
@@ -711,15 +725,13 @@ public class TimeLineView extends FrameLayout {
         } finally {
             a.recycle();
         }
-
-        initViews();
-        initMinimumHeight();
     }
 
-    private void initViews() {
-//        gestureDetector = new GestureDetectorCompat(getContext(), gestureListener);
+    private void initGestureDetector() {
         gestureDetector = new GestureDetectorCompat(getContext(), gestureListener);
+    }
 
+    private void initPaints() {
         hourLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         hourLinePaint.setStrokeWidth(attrHourLineWidth);
         hourLinePaint.setColor(attrHourLineColor);
@@ -747,6 +759,25 @@ public class TimeLineView extends FrameLayout {
         int hours = attrMaxHour - attrMinHour;
         setMinimumHeight(hours * (int) attrHourHeight + getPaddingTop() + getPaddingBottom());
     }
+
+    private void initHourTextList() {
+        hourTextList.clear();
+        for (int i=0; i<24; i++) {
+            hourTextList.add(getHourText(i));
+        }
+        hourColWidth = hourTextPaint.measureText(getCachedHourText(0)) + attrHourPaddingLeft + attrHourPaddingRight;
+    }
+    //endregion
+
+    //region Hour methods
+    public String getHourText(int hour) {
+        return String.format(Locale.getDefault(), "%02d:00", hour);
+    }
+
+    public String getCachedHourText(int hour) {
+        hour = ((hour%24)+24)%24;
+        return hourTextList.get(hour);
+    }
     //endregion
 
     //region Draw methods
@@ -754,56 +785,61 @@ public class TimeLineView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-//        float shiftY = -attrMinHour *attrHourHeight;
-//        float startX = hourColWidth;
-
         onDrawDisabledIntervals(canvas);
         onDrawColoredIntervals(canvas);
         onDrawHourLinesAndText(canvas);
     }
 
     protected void onDrawHourLinesAndText(Canvas canvas) {
-        String hourText = "00:00";
-        float maxWidth = canvas.getWidth();
-        float hourColWidth = hourTextPaint.measureText(hourText) + attrHourPaddingLeft + attrHourPaddingRight;
+        int padLeft = getPaddingLeft();
+        float padHourLeft = padLeft + attrHourPaddingLeft;
+        float hourColRight = getStartX();
+        float lineRignt = getEndX();
 
-        canvas.drawRect(0, 0, hourColWidth, canvas.getHeight(), hourBgPaint);
+        float textShiftY = -((hourTextPaint.descent() + hourTextPaint.ascent()) / 2);
 
-        for (int hour = attrMinHour+1; hour< attrMaxHour; hour++) {
+        if (hourBgPaint.getColor() != Color.TRANSPARENT) {
+            canvas.drawRect(
+                    padLeft,
+                    0, //padTop - attrHourTextSize / 3,
+                    hourColRight,
+                    canvas.getHeight(), // - padBottom + 2*attrHourTextSize / 3,
+                    hourBgPaint);
+        }
+
+        for (int hour = attrMinHour; hour<= attrMaxHour; hour++) {
             float y = getPositionByHours(hour);
-            canvas.drawLine(hourColWidth, y, maxWidth, y, hourLinePaint);
-            int localHour = ((hour%24)+24)%24;
-            hourText = String.format(Locale.getDefault(), "%02d:00", localHour);
-            canvas.drawText(hourText, attrHourPaddingLeft, y + attrHourTextSize / 3, hourTextPaint);
+            canvas.drawLine(hourColRight, y, lineRignt, y, hourLinePaint);
+            canvas.drawText(getCachedHourText(hour), padHourLeft, y + textShiftY, hourTextPaint);
         }
     }
 
     protected void onDrawDisabledIntervals(Canvas canvas) {
-        float left = 0;
-        float right = canvas.getWidth();
-        int minMinute = attrMinHour *60;
-        int maxMinute = attrMaxHour *60;
+        float left = getStartX();
+        float right = getEndX();
+        int minMinute = attrMinHour * 60;
+        int maxMinute = attrMaxHour * 60;
         for (MinuteInterval interval: getDisabledTimes()) {
             if (interval.isValid() && interval.isCollide(minMinute, maxMinute)) {
-                float y0 = getPositionYByMinutes(interval.start);
-                float y1 = getPositionYByMinutes(interval.end);
-                canvas.drawRect(left, y0, right, y1, disabledTimePaint);
+                float yStart = getPositionYByMinutes(interval.start);
+                float yEnd = getPositionYByMinutes(interval.end);
+                canvas.drawRect(left, yStart, right, yEnd, disabledTimePaint);
             }
         }
     }
 
     protected void onDrawColoredIntervals(Canvas canvas) {
-        float left = 0;
-        float right = canvas.getWidth();
-        int minMinute = attrMinHour *60;
-        int maxMinute = attrMaxHour *60;
+        float left = getStartX();
+        float right = getEndX();
+        int minMinute = attrMinHour * 60;
+        int maxMinute = attrMaxHour * 60;
         for (ColoredInterval ci: getColoredIntervals()) {
             MinuteInterval interval = ci.interval;
             if (interval.isValid() && interval.isCollide(minMinute, maxMinute)) {
-                float y0 = getPositionYByMinutes(interval.start);
-                float y1 = getPositionYByMinutes(interval.end);
+                float yStart = getPositionYByMinutes(interval.start);
+                float yEnd = getPositionYByMinutes(interval.end);
                 coloredTimePaint.setColor(ci.color);
-                canvas.drawRect(left, y0, right, y1, coloredTimePaint);
+                canvas.drawRect(left, yStart, right, yEnd, coloredTimePaint);
             }
         }
     }
@@ -811,9 +847,17 @@ public class TimeLineView extends FrameLayout {
 
     //region Override view methods
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        layoutChanged();
+//        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            layoutChanged();
+//            invalidate();
+        }
     }
 
     @Override
@@ -824,8 +868,8 @@ public class TimeLineView extends FrameLayout {
     //endregion
 
     //region Math positions and time methods
-    public float getPositionByHours(float hours) {
-        return attrHourHeight * (hours - attrMinHour) + getPaddingTop();
+    public float getPositionByHours(float hour) {
+        return attrHourHeight * (hour - attrMinHour) + getPaddingTop();
     }
 
     public float getPositionYByMinutes(int minutes) {
@@ -840,6 +884,14 @@ public class TimeLineView extends FrameLayout {
 //        float minutes = 60*(attrMinHour + pos/attrHourHeight);
 //        return (int) minutes;
         return (int)(60 * getHoursByPosition(pos));
+    }
+
+    public float getStartX() {
+        return getPaddingLeft() + hourColWidth + attrHourPaddingLeft;
+    }
+
+    public float getEndX() {
+        return getWidth() - getPaddingRight();
     }
     //endregion
 
@@ -874,17 +926,17 @@ public class TimeLineView extends FrameLayout {
             }
         }
 
-        this.addView(holder.getView());
+        View view = holder.getView();
+        this.addView(view);
+
         return true;
     }
 
     protected void reinitEventsRect(@NonNull Cluster cluster) {
-        String hourText = "00:00";
-        float hourColWidth = hourTextPaint.measureText(hourText) + attrHourPaddingLeft + attrHourPaddingRight;
-        float width = this.getMeasuredWidth();
-        float eventsWidth = width - hourColWidth;
-        float offsetY = -attrMinHour*attrHourHeight + getPaddingTop();
-        cluster.remathViewRect(hourColWidth, eventsWidth, offsetY, attrHourHeight);
+        float offsetX = getStartX();
+        float eventsWidth = getEndX() - offsetX;
+        float offsetY = getPositionByHours(0);
+        cluster.remathViewRect(offsetX, offsetY, eventsWidth, attrHourHeight);
     }
 
     public void layoutChanged() {
@@ -893,13 +945,13 @@ public class TimeLineView extends FrameLayout {
         }
     }
 
-    public void clear() {
+    public void clearEvents() {
         clusters.clear();
         removeAllViews();
     }
 
     public <T extends IEventHolder> void  setData(List<T> holders) {
-        clear();
+        clearEvents();
         if (holders == null || holders.isEmpty()) {
             return;
         }

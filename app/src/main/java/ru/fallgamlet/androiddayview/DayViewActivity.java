@@ -37,6 +37,7 @@ public class DayViewActivity extends AppCompatActivity {
 
         final int HOUR = 60;
         int startMinute, endMinute;
+
         startMinute = -1*HOUR + 20;
         endMinute = startMinute + 2*HOUR + 45;
         events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));

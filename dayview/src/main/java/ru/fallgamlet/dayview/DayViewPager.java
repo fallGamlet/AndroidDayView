@@ -725,7 +725,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         }
 
         if (timeLineView != null) {
-            timeLineView.clear();
+            timeLineView.clearEvents();
             timeLineView.getColoredIntervals().clear();
             timeLineView.getDisabledTimes().clear();
         }
