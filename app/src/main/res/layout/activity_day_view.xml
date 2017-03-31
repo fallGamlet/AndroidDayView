@@ -29,7 +29,7 @@
             app:hourHeight="60dp"
             app:hourPaddingLeft="0dp"
             app:hourPaddingRight="8dp"
-            app:hourLineWidth="0.2dp"
+            app:hourLineWidth="0.5dp"
             app:hourLineColor="#AAA"
             app:hourBackground="#11000000"
             app:hourTextColor="#444"

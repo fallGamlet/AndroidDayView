@@ -173,6 +173,11 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     private float attrDayTextPaddingRight;
     private float attrDayTextPaddingTop;
     private float attrDayTextPaddingBottom;
+    private float attrTimeLinePadding = 8;
+    private float attrTimeLinePaddingLeft;
+    private float attrTimeLinePaddingRight;
+    private float attrTimeLinePaddingTop;
+    private float attrTimeLinePaddingBottom;
 
     DayPagerAdapter adapter;
     OnContentListener contentListener;
@@ -448,6 +453,9 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         attrHourPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrHourPadding, dm);
         attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
 
+        attrTimeLinePadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrTimeLinePadding, dm);
+        attrTimeLinePaddingLeft = attrTimeLinePaddingRight = attrTimeLinePaddingTop = attrTimeLinePaddingBottom = attrTimeLinePadding;
+
         attrDayTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrDayTextSize, dm);
         attrDayTextPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, attrDayTextPadding, dm);
         attrDayTextPaddingLeft = attrDayTextPaddingRight = attrDayTextPaddingTop = attrDayTextPaddingBottom = attrDayTextPadding;
@@ -468,6 +476,13 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
                 attrHourPaddingLeft = a.getDimension(R.styleable.DayViewPager_hourPaddingLeft, attrHourPaddingLeft);
                 attrHourPaddingRight = a.getDimension(R.styleable.DayViewPager_hourPaddingRight, attrHourPaddingRight);
                 attrDisabledTimeColor = a.getColor(R.styleable.DayViewPager_disabledTimeColor, attrDisabledTimeColor);
+
+                attrTimeLinePadding = a.getDimension(R.styleable.DayViewPager_timeLinePadding, attrTimeLinePadding);
+                attrTimeLinePaddingLeft = attrTimeLinePaddingRight = attrTimeLinePaddingTop = attrTimeLinePaddingBottom = attrTimeLinePadding;
+                attrTimeLinePaddingLeft = a.getDimension(R.styleable.DayViewPager_timeLinePaddingLeft, attrTimeLinePaddingLeft);
+                attrTimeLinePaddingRight = a.getDimension(R.styleable.DayViewPager_timeLinePaddingRight, attrTimeLinePaddingRight);
+                attrTimeLinePaddingTop = a.getDimension(R.styleable.DayViewPager_timeLinePaddingTop, attrTimeLinePaddingTop);
+                attrTimeLinePaddingBottom = a.getDimension(R.styleable.DayViewPager_timeLinePaddingBottom, attrTimeLinePaddingBottom);
 
                 attrDayTextColor = a.getColor(R.styleable.DayViewPager_dayTextColor, attrDayTextColor);
                 attrDayTextSize = a.getDimension(R.styleable.DayViewPager_dayTextSize, attrDayTextSize);
@@ -611,6 +626,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         TimeLineView timeLineView = holder.timeLineView;
         if (timeLineView != null) {
             // Configure TimeLineView
+            timeLineView.setPadding((int)attrTimeLinePaddingLeft, (int)attrTimeLinePaddingTop, (int)attrTimeLinePaddingRight, (int)attrTimeLinePaddingBottom);
             timeLineView.setMinHour(attrMinHour);
             timeLineView.setMaxHour(attrMaxHour);
             timeLineView.setHourBackground(attrHourBackground);

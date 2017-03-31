@@ -801,9 +801,9 @@ public class TimeLineView extends FrameLayout {
         if (hourBgPaint.getColor() != Color.TRANSPARENT) {
             canvas.drawRect(
                     padLeft,
-                    0, //padTop - attrHourTextSize / 3,
+                    0,
                     hourColRight,
-                    canvas.getHeight(), // - padBottom + 2*attrHourTextSize / 3,
+                    canvas.getHeight(),
                     hourBgPaint);
         }
 
@@ -854,6 +854,7 @@ public class TimeLineView extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        invalidate();
         layoutEventsChange();
     }
 
