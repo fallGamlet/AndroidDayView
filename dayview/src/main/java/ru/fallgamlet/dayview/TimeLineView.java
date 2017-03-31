@@ -859,8 +859,7 @@ public class TimeLineView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean val = gestureDetector.onTouchEvent(event);
-        return val; //super.onTouchEvent(event);
+        return gestureDetector.onTouchEvent(event); //super.onTouchEvent(event);
     }
     //endregion
 
