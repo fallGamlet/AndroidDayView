@@ -713,6 +713,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         TimeLineView timeLineView = dayHolder.timeLineView;
         if (timeLineView != null) {
             timeLineView.setHourInterval(minHour, maxHour);
+            timeLineView.setDisabledTimeColor(attrDisabledTimeColor);
 
             timeLineView.getDisabledTimes().clear();
             if (disabledIntervals != null && !disabledIntervals.isEmpty()) {
