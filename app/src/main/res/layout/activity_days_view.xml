@@ -59,6 +59,7 @@
         app:hourPaddingRight="16dp"
         app:hourMin="0"
         app:hourMax="24"
+        app:disabledTimeColor="#22000000"
         />
 
 </LinearLayout>

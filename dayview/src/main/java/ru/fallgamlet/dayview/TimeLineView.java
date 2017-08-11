@@ -718,10 +718,6 @@ public class TimeLineView extends FrameLayout {
             attrHourPaddingLeft = a.getDimension(R.styleable.TimeLineView_hourPaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingLeft, dm));
             attrHourPaddingRight = a.getDimension(R.styleable.TimeLineView_hourPaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingRight, dm));
             attrDisabledTimeColor = a.getColor(R.styleable.TimeLineView_disabledTimeColor, attrDisabledTimeColor);
-//            if (a.hasValue(R.styleable.DayView_exampleDrawable)) {
-//                mExampleDrawable = a.getDrawable(R.styleable.DayView_exampleDrawable);
-//                mExampleDrawable.setCallback(this);
-//            }
         } finally {
             a.recycle();
         }
@@ -819,6 +815,7 @@ public class TimeLineView extends FrameLayout {
         float right = getEndX();
         int minMinute = attrMinHour * 60;
         int maxMinute = attrMaxHour * 60;
+        disabledTimePaint.setColor(attrDisabledTimeColor);
         for (MinuteInterval interval: getDisabledTimes()) {
             if (interval.isValid() && interval.isCollide(minMinute, maxMinute)) {
                 float yStart = getPositionYByMinutes(interval.start);

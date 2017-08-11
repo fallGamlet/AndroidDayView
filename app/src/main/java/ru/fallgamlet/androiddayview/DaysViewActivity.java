@@ -301,7 +301,20 @@ public class DaysViewActivity extends AppCompatActivity {
 
                 @Override
                 public List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date) {
-                    return null;
+                    int hour = -1;
+                    if (date != null) {
+                        int weekDay = date.get(Calendar.DAY_OF_WEEK);
+                        hour = getWorkTime(weekDay).getEnd();
+                    }
+
+                    int start = (hour - 1) * 60;
+                    int end = start + 90;
+
+                    TimeLineView.MinuteInterval interval = new TimeLineView.MinuteInterval(start, end);
+                    List<TimeLineView.MinuteInterval> disableIntervals = new ArrayList<>(2);
+                    disableIntervals.add(interval);
+
+                    return disableIntervals;
                 }
             };
         }
