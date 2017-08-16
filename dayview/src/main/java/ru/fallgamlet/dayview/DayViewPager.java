@@ -156,6 +156,9 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     private float attrDensity;
     private float attrHourHeight = 60;
     private float attrHourLineWidth = 1;
+    private float attrHourLinePadding = 0;
+    private float attrHourLinePaddingLeft = attrHourLinePadding;
+    private float attrHourLinePaddingRight = attrHourLinePadding;
     private int attrDisabledTimeColor = Color.parseColor("#22000000");
     private int attrHourLineColor = Color.GRAY;
     private int attrHourTextColor = Color.DKGRAY;
@@ -229,6 +232,30 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
     public void setHourLineWidth(float attrHourLineWidth) {
         this.attrHourLineWidth = attrHourLineWidth;
+    }
+
+    public float getHourLinePadding() {
+        return attrHourLinePadding;
+    }
+
+    public void setHourLinePadding(float padding) {
+        attrHourLinePaddingLeft = attrHourLinePaddingRight = attrHourLinePadding = padding;
+    }
+
+    public float getHourLinePaddingLeft() {
+        return attrHourLinePaddingLeft;
+    }
+
+    public void setHourLinePaddingLeft(float padding) {
+        attrHourLinePaddingLeft = padding;
+    }
+
+    public float getHourLinePaddingRight() {
+        return attrHourLinePaddingRight;
+    }
+
+    public void setHourLinePaddingRight(float padding) {
+        attrHourLinePaddingRight = padding;
     }
 
     public int getDisabledTimeColor() {
@@ -471,11 +498,17 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
                 attrHourBackground = a.getColor(R.styleable.DayViewPager_hourBackground, attrHourBackground);
                 attrHourTextColor = a.getColor(R.styleable.DayViewPager_hourTextColor, attrHourTextColor);
                 attrHourTextSize = a.getDimension(R.styleable.DayViewPager_hourTextSize, attrHourTextSize);
-                attrHourPadding = a.getDimension(R.styleable.DayViewPager_hourPadding, attrHourPadding);
-                attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
-                attrHourPaddingLeft = a.getDimension(R.styleable.DayViewPager_hourPaddingLeft, attrHourPaddingLeft);
-                attrHourPaddingRight = a.getDimension(R.styleable.DayViewPager_hourPaddingRight, attrHourPaddingRight);
                 attrDisabledTimeColor = a.getColor(R.styleable.DayViewPager_disabledTimeColor, attrDisabledTimeColor);
+
+                attrHourPadding = a.getDimension(R.styleable.DayViewPager_hourPadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPadding, dm));
+                attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
+                attrHourPaddingLeft = a.getDimension(R.styleable.DayViewPager_hourPaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingLeft, dm));
+                attrHourPaddingRight = a.getDimension(R.styleable.DayViewPager_hourPaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingRight, dm));
+
+                attrHourLinePadding = a.getDimension(R.styleable.DayViewPager_hourLinePadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePadding, dm));
+                attrHourLinePaddingLeft = attrHourLinePaddingRight = attrHourLinePadding;
+                attrHourLinePaddingLeft = a.getDimension(R.styleable.DayViewPager_hourLinePaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePaddingLeft, dm));
+                attrHourLinePaddingRight = a.getDimension(R.styleable.DayViewPager_hourLinePaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePaddingRight, dm));
 
                 attrTimeLinePadding = a.getDimension(R.styleable.DayViewPager_timeLinePadding, attrTimeLinePadding);
                 attrTimeLinePaddingLeft = attrTimeLinePaddingRight = attrTimeLinePaddingTop = attrTimeLinePaddingBottom = attrTimeLinePadding;
@@ -625,19 +658,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
 
         TimeLineView timeLineView = holder.timeLineView;
         if (timeLineView != null) {
-            // Configure TimeLineView
-            timeLineView.setPadding((int)attrTimeLinePaddingLeft, (int)attrTimeLinePaddingTop, (int)attrTimeLinePaddingRight, (int)attrTimeLinePaddingBottom);
-            timeLineView.setMinHour(attrMinHour);
-            timeLineView.setMaxHour(attrMaxHour);
-            timeLineView.setHourBackground(attrHourBackground);
-            timeLineView.setHourHeight(attrHourHeight);
-            timeLineView.setHourLineColor(attrHourLineColor);
-            timeLineView.setHourLineWidth(attrHourLineWidth);
-            timeLineView.setHourPaddingLeft(attrHourPaddingLeft);
-            timeLineView.setHourPaddingRight(attrHourPaddingRight);
-            timeLineView.setDisabledTimeColor(attrDisabledTimeColor);
-            timeLineView.setHourTextColor(attrHourTextColor);
-            timeLineView.setHourTextSize(attrHourTextSize);
+            initTimeLineViewAttributes(timeLineView);
             timeLineView.invalidate();
             timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
                 @Override
@@ -681,6 +702,29 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         return holder;
     }
 
+    private void initTimeLineViewAttributes(TimeLineView view) {
+        view.setPadding((int)attrTimeLinePaddingLeft, (int)attrTimeLinePaddingTop, (int)attrTimeLinePaddingRight, (int)attrTimeLinePaddingBottom);
+        view.setMinHour(attrMinHour);
+        view.setMaxHour(attrMaxHour);
+        view.setDisabledTimeColor(attrDisabledTimeColor);
+
+        view.setHourLinePadding(attrHourLinePadding);
+        view.setHourLinePaddingLeft(attrHourLinePaddingLeft);
+        view.setHourLinePaddingRight(attrHourLinePaddingRight);
+
+        view.setHourPadding(attrHourPadding);
+        view.setHourPaddingLeft(attrHourPaddingLeft);
+        view.setHourPaddingRight(attrHourPaddingRight);
+
+        view.setHourBackground(attrHourBackground);
+        view.setHourHeight(attrHourHeight);
+        view.setHourLineColor(attrHourLineColor);
+        view.setHourLineWidth(attrHourLineWidth);
+        view.setHourTextColor(attrHourTextColor);
+        view.setHourTextSize(attrHourTextSize);
+    }
+
+
     @Override
     public void onBindData(DayPagerAdapter.ViewHolder holder, int position) {
         if (holder == null || !(holder instanceof DayViewHolder)) {
@@ -713,7 +757,6 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         TimeLineView timeLineView = dayHolder.timeLineView;
         if (timeLineView != null) {
             timeLineView.setHourInterval(minHour, maxHour);
-            timeLineView.setDisabledTimeColor(attrDisabledTimeColor);
 
             timeLineView.getDisabledTimes().clear();
             if (disabledIntervals != null && !disabledIntervals.isEmpty()) {
@@ -726,6 +769,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
             timeLineView.setData(eventHolders);
         }
     }
+
 
     @Override
     public void onUnbindData(DayPagerAdapter.ViewHolder holder, int position) {

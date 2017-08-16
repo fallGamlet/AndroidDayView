@@ -34,6 +34,8 @@
             app:hourBackground="#11000000"
             app:hourTextColor="#444"
             app:hourTextSize="12sp"
+            app:hourLinePaddingLeft="15dp"
+            app:hourLinePaddingRight="5dp"
             app:disabledTimeColor="#99555555"/>
 
     </android.support.v4.widget.NestedScrollView>

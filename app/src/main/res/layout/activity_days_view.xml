@@ -57,6 +57,8 @@
         app:hourHeight="50dp"
         app:hourPaddingLeft="0dp"
         app:hourPaddingRight="16dp"
+        app:hourLinePadding="5dp"
+        app:hourLinePaddingRight="15dp"
         app:hourMin="0"
         app:hourMax="24"
         app:disabledTimeColor="#22000000"

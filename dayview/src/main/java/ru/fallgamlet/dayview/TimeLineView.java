@@ -361,8 +361,11 @@ public class TimeLineView extends FrameLayout {
 
     // Attributes
     private float attrHourHeight = 60;
-    private float attrHourLineWidth = 1;
     private int attrDisabledTimeColor = Color.parseColor("#22000000");
+    private float attrHourLineWidth = 1;
+    private float attrHourLinePadding = 0;
+    private float attrHourLinePaddingLeft = attrHourLinePadding;
+    private float attrHourLinePaddingRight = attrHourLinePadding;
     private int attrHourLineColor = Color.GRAY;
     private int attrHourTextColor = Color.DKGRAY;
     private float attrHourTextSize = 12;
@@ -441,7 +444,6 @@ public class TimeLineView extends FrameLayout {
             super.onLongPress(e);
         }
     };
-
     //endregion
 
     //region Constructors
@@ -505,6 +507,30 @@ public class TimeLineView extends FrameLayout {
         if (hourLinePaint != null) {
             hourLinePaint.setStrokeWidth(attrHourLineWidth);
         }
+    }
+
+    public float getHourLinePadding() {
+        return attrHourLinePadding;
+    }
+
+    public void setHourLinePadding(float padding) {
+        attrHourLinePaddingLeft = attrHourLinePaddingRight = attrHourLinePadding = padding;
+    }
+
+    public float getHourLinePaddingLeft() {
+        return attrHourLinePaddingLeft;
+    }
+
+    public void setHourLinePaddingLeft(float padding) {
+        attrHourLinePaddingLeft = padding;
+    }
+
+    public float getHourLinePaddingRight() {
+        return attrHourLinePaddingRight;
+    }
+
+    public void setHourLinePaddingRight(float padding) {
+        attrHourLinePaddingRight = padding;
     }
 
     public int getDisabledTimeColor() {
@@ -699,7 +725,6 @@ public class TimeLineView extends FrameLayout {
     }
 
     private void initAttributes(AttributeSet attrs, int defStyle) {
-        // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TimeLineView, defStyle, 0);
         DisplayMetrics dm = getResources().getDisplayMetrics();
 
@@ -712,12 +737,17 @@ public class TimeLineView extends FrameLayout {
             attrHourBackground = a.getColor(R.styleable.TimeLineView_hourBackground, attrHourBackground);
             attrHourTextColor = a.getColor(R.styleable.TimeLineView_hourTextColor, attrHourTextColor);
             attrHourTextSize = a.getDimension(R.styleable.TimeLineView_hourTextSize, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourTextSize, dm));
-            attrHourPadding = a.getDimension(R.styleable.TimeLineView_hourPadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPadding, dm));
+            attrDisabledTimeColor = a.getColor(R.styleable.TimeLineView_disabledTimeColor, attrDisabledTimeColor);
 
+            attrHourLinePadding = a.getDimension(R.styleable.TimeLineView_hourLinePadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePadding, dm));
+            attrHourLinePaddingLeft = attrHourLinePaddingRight = attrHourLinePadding;
+            attrHourLinePaddingLeft = a.getDimension(R.styleable.TimeLineView_hourLinePaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePaddingLeft, dm));
+            attrHourLinePaddingRight = a.getDimension(R.styleable.TimeLineView_hourLinePaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourLinePaddingRight, dm));
+
+            attrHourPadding = a.getDimension(R.styleable.TimeLineView_hourPadding, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPadding, dm));
             attrHourPaddingLeft = attrHourPaddingRight = attrHourPadding;
             attrHourPaddingLeft = a.getDimension(R.styleable.TimeLineView_hourPaddingLeft, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingLeft, dm));
             attrHourPaddingRight = a.getDimension(R.styleable.TimeLineView_hourPaddingRight, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, attrHourPaddingRight, dm));
-            attrDisabledTimeColor = a.getColor(R.styleable.TimeLineView_disabledTimeColor, attrDisabledTimeColor);
         } finally {
             a.recycle();
         }
@@ -790,7 +820,8 @@ public class TimeLineView extends FrameLayout {
         int padLeft = getPaddingLeft();
         float padHourLeft = padLeft + attrHourPaddingLeft;
         float hourColRight = getStartX();
-        float lineRignt = getEndX();
+        float hourLineLeft = hourColRight + attrHourLinePaddingLeft;
+        float hourLineRight = getEndX() - attrHourLinePaddingRight;
 
         float textShiftY = -((hourTextPaint.descent() + hourTextPaint.ascent()) / 2);
 
@@ -805,7 +836,7 @@ public class TimeLineView extends FrameLayout {
 
         for (int hour = attrMinHour; hour<= attrMaxHour; hour++) {
             float y = getPositionByHours(hour);
-            canvas.drawLine(hourColRight, y, lineRignt, y, hourLinePaint);
+            canvas.drawLine(hourLineLeft, y, hourLineRight, y, hourLinePaint);
             canvas.drawText(getCachedHourText(hour), padHourLeft, y + textShiftY, hourTextPaint);
         }
     }

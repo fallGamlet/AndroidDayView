@@ -4,6 +4,9 @@
     <attr name="hourHeight" format="dimension"/>
     <attr name="hourLineWidth" format="dimension"/>
     <attr name="hourLineColor" format="color"/>
+    <attr name="hourLinePadding" format="dimension"/>
+    <attr name="hourLinePaddingLeft" format="dimension"/>
+    <attr name="hourLinePaddingRight" format="dimension"/>
     <attr name="hourTextColor" format="color"/>
     <attr name="hourBackground" format="color"/>
     <attr name="hourTextSize" format="dimension"/>
@@ -30,6 +33,9 @@
         <attr name="hourHeight"/>
         <attr name="hourLineWidth"/>
         <attr name="hourLineColor"/>
+        <attr name="hourLinePadding"/>
+        <attr name="hourLinePaddingLeft"/>
+        <attr name="hourLinePaddingRight"/>
         <attr name="hourTextColor"/>
         <attr name="hourBackground"/>
         <attr name="hourTextSize"/>
@@ -45,6 +51,9 @@
         <attr name="hourHeight"/>
         <attr name="hourLineWidth"/>
         <attr name="hourLineColor"/>
+        <attr name="hourLinePadding"/>
+        <attr name="hourLinePaddingLeft"/>
+        <attr name="hourLinePaddingRight"/>
         <attr name="hourTextColor"/>
         <attr name="hourBackground"/>
         <attr name="hourTextSize"/>
