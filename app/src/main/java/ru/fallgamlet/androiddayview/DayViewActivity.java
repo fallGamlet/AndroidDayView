@@ -6,6 +6,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.Inflater;
 
+import ru.fallgamlet.dayview.ColoredInterval;
+import ru.fallgamlet.dayview.IEventHolder;
+import ru.fallgamlet.dayview.IOnTimeSelectListener;
+import ru.fallgamlet.dayview.MinuteInterval;
 import ru.fallgamlet.dayview.TimeLineView;
 
 
@@ -40,36 +45,36 @@ public class DayViewActivity extends AppCompatActivity {
 
         startMinute = -1*HOUR + 20;
         endMinute = startMinute + 2*HOUR + 45;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 9*HOUR;
         endMinute = startMinute + 1*HOUR;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 9*HOUR;
         endMinute = startMinute + 2*HOUR;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 10*HOUR + 30;
         endMinute = startMinute + 1*HOUR;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 10*HOUR+30;
         endMinute = startMinute + 2*HOUR;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 12*HOUR;
         endMinute = startMinute + 1*HOUR;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
 
         startMinute = 22*HOUR+40;
         endMinute = startMinute + 2*HOUR+30;
-        events.add(new MyEventHolder(this, "Title", "Subtile", new TimeLineView.MinuteInterval(startMinute, endMinute)));
+        events.add(new MyEventHolder(this, "Title", "Subtile", new MinuteInterval(startMinute, endMinute)));
         //endregion
 
         OnClickListener clickListener = new OnClickListener() {
             @Override
-            public void onClick(TimeLineView.IEventHolder holder) {
+            public void onClick(IEventHolder holder) {
                 showSnackbar(holder.toString());
             }
         };
@@ -79,23 +84,23 @@ public class DayViewActivity extends AppCompatActivity {
         }
 
         //region Add disabled intervals
-        List<TimeLineView.MinuteInterval> disabledTimes = timeLineView.getDisabledTimes();
-        disabledTimes.add(new TimeLineView.MinuteInterval(8*HOUR+48, 10*HOUR+25));
-        disabledTimes.add(new TimeLineView.MinuteInterval(15*HOUR+15, 17*HOUR+5));
+        List<MinuteInterval> disabledTimes = timeLineView.getDisabledTimes();
+        disabledTimes.add(new MinuteInterval(8*HOUR+48, 10*HOUR+25));
+        disabledTimes.add(new MinuteInterval(15*HOUR+15, 17*HOUR+5));
         //endregion
 
         //region Add colored intervals
-        timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#200000FF"), new TimeLineView.MinuteInterval(0, 7*HOUR+30)));
-        timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#2000FF00"), new TimeLineView.MinuteInterval(7*HOUR+25, 11*HOUR+40)));
-        timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#20FF0000"), new TimeLineView.MinuteInterval(11*HOUR+40, 16*HOUR)));
-        timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#20FFFF00"), new TimeLineView.MinuteInterval(16*HOUR, 21*HOUR)));
-        timeLineView.addColoredInterval(new TimeLineView.ColoredInterval(Color.parseColor("#2000FFFF"), new TimeLineView.MinuteInterval(21*HOUR, 25*HOUR)));
+        timeLineView.addColoredInterval(new ColoredInterval(Color.parseColor("#200000FF"), new MinuteInterval(0, 7*HOUR+30)));
+        timeLineView.addColoredInterval(new ColoredInterval(Color.parseColor("#2000FF00"), new MinuteInterval(7*HOUR+25, 11*HOUR+40)));
+        timeLineView.addColoredInterval(new ColoredInterval(Color.parseColor("#20FF0000"), new MinuteInterval(11*HOUR+40, 16*HOUR)));
+        timeLineView.addColoredInterval(new ColoredInterval(Color.parseColor("#20FFFF00"), new MinuteInterval(16*HOUR, 21*HOUR)));
+        timeLineView.addColoredInterval(new ColoredInterval(Color.parseColor("#2000FFFF"), new MinuteInterval(21*HOUR, 25*HOUR)));
         //endregion
 
         timeLineView.setData(events);
         timeLineView.invalidate();
 
-        timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
+        timeLineView.setOnTimeSelectListener(new IOnTimeSelectListener() {
             @Override
             public void onTimePress(Object sender, int minute) {
                 onPressed(sender, minute);
@@ -118,16 +123,15 @@ public class DayViewActivity extends AppCompatActivity {
     }
 
     interface OnClickListener {
-        void onClick(TimeLineView.IEventHolder holder);
+        void onClick(IEventHolder holder);
     }
 
-    public static class  MyEventHolder implements TimeLineView.IEventHolder, View.OnClickListener {
-        private TimeLineView.MinuteInterval timeInterval;
+    public static class  MyEventHolder implements IEventHolder, View.OnClickListener {
+        private MinuteInterval timeInterval;
         private String title;
         private String subtitle;
         private View rootView;
-        private TextView startView;
-        private TextView endView;
+        private TextView timeView;
         private TextView titleView;
         private TextView subtitleView;
         private SimpleDateFormat timeFormatter;
@@ -137,7 +141,7 @@ public class DayViewActivity extends AppCompatActivity {
             initView(context);
         }
 
-        public MyEventHolder(Context context, String title, String subtitle, TimeLineView.MinuteInterval timeInterval) {
+        public MyEventHolder(Context context, String title, String subtitle, MinuteInterval timeInterval) {
             initView(context);
             initData(title, subtitle, timeInterval);
         }
@@ -168,8 +172,7 @@ public class DayViewActivity extends AppCompatActivity {
             this.rootView = rootView;
             if (rootView != null) {
                 rootView.setOnClickListener(this);
-                startView = (TextView) rootView.findViewById(R.id.startView);
-                endView = (TextView) rootView.findViewById(R.id.endView);
+                timeView = (TextView) rootView.findViewById(R.id.timeView);
                 titleView = (TextView) rootView.findViewById(R.id.titleView);
                 subtitleView = (TextView) rootView.findViewById(R.id.subtitleView);
             }
@@ -181,11 +184,11 @@ public class DayViewActivity extends AppCompatActivity {
         }
 
         @Override
-        public TimeLineView.MinuteInterval getTimeInterval() {
+        public MinuteInterval getTimeInterval() {
             return timeInterval;
         }
 
-        public void setTimeInterval(TimeLineView.MinuteInterval timeInterval) {
+        public void setTimeInterval(MinuteInterval timeInterval) {
             this.timeInterval = timeInterval;
         }
 
@@ -209,7 +212,7 @@ public class DayViewActivity extends AppCompatActivity {
             setView(view);
         }
 
-        public void initData(String title, String subtitle, TimeLineView.MinuteInterval timeInterval) {
+        public void initData(String title, String subtitle, MinuteInterval timeInterval) {
             this.title = title;
             this.subtitle = subtitle;
             this.timeInterval = timeInterval;
@@ -222,11 +225,11 @@ public class DayViewActivity extends AppCompatActivity {
         }
 
         public void notifyDataChanged() {
-            if (titleView != null) { startView.setText(title); }
+            if (titleView != null) { titleView.setText(title); }
             if (subtitleView != null) { subtitleView.setText(subtitle); }
 
-            String startStr = null
-                    , endStr = null;
+            String timeStr = null;
+
             if (timeInterval != null) {
                 int startMinute = timeInterval.getStart();
                 int endMinute = timeInterval.getEnd();
@@ -235,19 +238,20 @@ public class DayViewActivity extends AppCompatActivity {
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.add(Calendar.MINUTE, startMinute);
 
+                String startStr, endStr;
+
                 startStr = formatTime(calendar.getTime());
 
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.add(Calendar.MINUTE, endMinute);
-//                calendar.set(Calendar.HOUR_OF_DAY, endMinute/60);
-//                calendar.set(Calendar.MINUTE, endMinute%60);
 
                 endStr = formatTime(calendar.getTime());
+
+                timeStr = String.format(Locale.getDefault(), " %s - %s", startStr, endStr);
             }
 
-            if (startView != null) { startView.setText(startStr); }
-            if (endView != null) { endView.setText(endStr); }
+            if (timeView != null) { timeView.setText(timeStr); }
         }
 
         @Override

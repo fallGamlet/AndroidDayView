@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
@@ -23,341 +24,11 @@ import java.util.Locale;
 
 
 public class TimeLineView extends FrameLayout {
-    //region Sub classes and interfaces
-    public static class MinuteInterval{
-        private int start, end;
-
-        //region Constructors
-        public MinuteInterval() {
-            setData(0,0);
-        }
-
-        public MinuteInterval(int start, int end) {
-            setData(start, end);
-        }
-        //endregion
-
-        //region Getters and Setters
-        public int getStart() { return start; }
-
-        public int getEnd() { return end; }
-        //endregion
-
-        //region Methods
-        public void setData(int start, int end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        public boolean isValid() {
-            return start < end;
-        }
-
-        public static int getCollide(int start1, int end1, int start2, int end2) {
-            return (end1 - start2) * (end2 - start1);
-        }
-
-        public static int getCollide(@NonNull MinuteInterval mi1, @NonNull MinuteInterval mi2) {
-            return getCollide(mi1.start, mi1.end, mi2.start, mi2.end);
-        }
-
-        public static boolean isCollide(int start1, int end1, int start2, int end2) {
-            return getCollide(start1, end1, start2, end2) > 0;
-        }
-
-        public static boolean isCollide(MinuteInterval mi1, MinuteInterval mi2) {
-            return !(mi1 == null || mi2 == null) && isCollide(mi1.start, mi1.end, mi2.start, mi2.end);
-        }
-
-        public boolean isCollide(int start, int end) {
-            return isCollide(this.start, this.end, start, end);
-        }
-
-        public boolean isCollide(MinuteInterval mi) {
-            return isCollide(this, mi);
-        }
-
-        public static MinuteInterval union(MinuteInterval mi1, MinuteInterval mi2) {
-            if (mi1 == null) { return mi2; }
-            if (mi2 == null) { return mi1; }
-            return new MinuteInterval(
-                    Math.min(mi1.start, mi2.start),
-                    Math.max(mi1.end, mi2.end));
-        }
-
-        public static MinuteInterval intersection(MinuteInterval ti1, MinuteInterval ti2) {
-            MinuteInterval interval = null;
-            if (isCollide(ti1, ti2)) {
-                interval = new MinuteInterval(
-                        Math.max(ti1.start, ti2.start),
-                        Math.min(ti1.end, ti2.end));
-            }
-            return interval;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.getDefault(), "%02d:%02d - %02d:%02d", start/60, start%60, end/60, end%60);
-        }
-
-        //endregion
-    }
-
-    public static class ColoredInterval {
-        private int color;
-        private MinuteInterval interval;
-
-        public ColoredInterval() {
-            setData(0, null);
-        }
-
-        public ColoredInterval(int color, MinuteInterval interval) {
-            setData(color, interval);
-        }
-
-        //region Getters and Setters
-        public int getColor() {
-            return color;
-        }
-
-        public void setColor(int color) {
-            this.color = color;
-        }
-
-        public MinuteInterval getInterval() {
-            return interval;
-        }
-
-        public void setInterval(MinuteInterval interval) {
-            this.interval = interval;
-        }
-        //endregion
-
-        //region Methods
-        public void setData(int color, MinuteInterval interval) {
-            this.color = color;
-            this.interval = interval;
-        }
-
-        public static void sort(List<? extends ColoredInterval> list) {
-            Collections.sort(list, new Comparator<ColoredInterval>() {
-                @Override
-                public int compare(ColoredInterval ci1, ColoredInterval ci2) {
-                    if (ci1 == ci2) { return 0; }
-                    if (ci1 == null) { return -1; }
-                    if (ci2 == null) { return 1; }
-
-                    MinuteInterval mi1 = ci1.getInterval();
-                    MinuteInterval mi2 = ci1.getInterval();
-
-                    if (mi1 == mi2) { return 0; }
-                    if (mi1 == null) { return -1; }
-                    if (mi2 == null) { return 1; }
-
-                    return mi1.start - mi2.start;
-                }
-            });
-        }
-        //endregion
-    }
-
-    public interface IEventHolder {
-        View getView();
-        MinuteInterval getTimeInterval();
-    }
-
-    public interface IOnTimeSelectListener {
-        void onTimePress(Object sender, int minute);
-        void onTimeLongPressed(Object sender, int minute);
-    }
-
-    public static class Cluster {
-        //region Fields
-        MinuteInterval timeInterval;
-        List<List<IEventHolder>> columns = new ArrayList<>();
-        //endregion
-
-        //region Constructor
-        public Cluster() {
-            timeInterval = null;
-        }
-        //endregion
-
-        //region Methods
-        public boolean isEmpty() {
-            return columns.isEmpty();
-        }
-
-        public int getColumns() {
-            return columns.size();
-        }
-
-        public boolean isCollide(MinuteInterval timeInterval) {
-            return MinuteInterval.isCollide(this.timeInterval, timeInterval);
-        }
-
-        protected boolean isCollideForColumn(List<IEventHolder> column, IEventHolder holder) {
-            if (holder == null || column == null || column.isEmpty()) { return false; }
-            boolean check = false;
-            for (IEventHolder item: column) {
-                if (MinuteInterval.isCollide(item.getTimeInterval(), holder.getTimeInterval())) {
-                    check = true;
-                    break;
-                }
-            }
-            return check;
-        }
-
-        protected int indexOfCollideColumn(IEventHolder holder) {
-            int index = -1;
-            if (holder != null && !isEmpty()) {
-                int i=0;
-                 for (List<IEventHolder> column: columns) {
-                     if(isCollideForColumn(column, holder)) {
-                         index = i;
-                         break;
-                     }
-                     i++;
-                 }
-            }
-            return index;
-        }
-
-        protected int indexOfNotCollideColumn(IEventHolder holder) {
-            int index = -1;
-            if (holder != null && !isEmpty()) {
-                int i=0;
-                for (List<IEventHolder> column: columns) {
-                    if(!isCollideForColumn(column, holder)) {
-                        index = i;
-                        break;
-                    }
-                    i++;
-                }
-            }
-            return index;
-        }
-
-        public MinuteInterval getTimeInterval() {
-            return timeInterval;
-        }
-
-        public boolean add(IEventHolder holder) {
-            if (holder == null || holder.getTimeInterval() == null) {
-                return false;
-            }
-            if (isEmpty()) {
-                timeInterval = holder.getTimeInterval();
-                List<IEventHolder> column = new ArrayList<>();
-                column.add(holder);
-                columns.add(column);
-                return true;
-            }
-            if (!isCollide(holder.getTimeInterval())) {
-                return false;
-            }
-
-            MinuteInterval ti = MinuteInterval.union(timeInterval, holder.getTimeInterval());
-            int i = indexOfNotCollideColumn(holder);
-            if (i>=0) {
-                columns.get(i).add(holder);
-            } else {
-                List<IEventHolder> column = new ArrayList<>();
-                column.add(holder);
-                columns.add(column);
-            }
-            this.timeInterval = ti;
-            return true;
-        }
-
-        /* Without test for collide clusters
-         */
-        public static Cluster unionClusters(Cluster... clusters) {
-            if (clusters == null || clusters.length == 0) {
-                return null;
-            }
-
-            Cluster cluster = null;
-            Cluster bufCluster = null;
-            List<IEventHolder> holders = new ArrayList<>(100);
-            MinuteInterval timeInterval = null;
-            for (int i=0; i<clusters.length; i++) {
-                bufCluster = clusters[i];
-                if (bufCluster != null && !bufCluster.isEmpty()) {
-                    timeInterval = MinuteInterval.union(timeInterval, bufCluster.getTimeInterval());
-                    holders.addAll(bufCluster.getAllItems());
-                }
-            }
-            if (timeInterval != null && !holders.isEmpty()) {
-                cluster = new Cluster();
-                cluster.timeInterval = timeInterval;
-                for (IEventHolder holder: holders) {
-                    cluster.add(holder);
-                }
-            }
-            return cluster;
-        }
-
-        public MinuteInterval remathTimeInterval() {
-            MinuteInterval mi = null;
-            for (List<IEventHolder> column : columns) {
-                for (IEventHolder item: column) {
-                    mi = MinuteInterval.union(mi, item.getTimeInterval());
-                }
-            }
-            this.timeInterval = mi;
-            return mi;
-        }
-
-        public void remathViewRect(float offsetLeft, float offsetTop, float width, float hourHeight) {
-            if (isEmpty()) { return; }
-            int count = getColumns();
-            float itemWidth = width / count;
-            int colNum = 0;
-            for (List<IEventHolder> column : columns) {
-                int left = (int)(colNum*itemWidth + offsetLeft);
-                int right = (int) (left + itemWidth);
-                int top, bottom;
-                for (IEventHolder item: column) {
-                    View view = item.getView();
-                    if (view != null) {
-                        try {
-                            float hoursStart = item.getTimeInterval().getStart() / 60.0f;
-                            float hoursEnd = item.getTimeInterval().getEnd() / 60.0f;
-                            top = (int) (offsetTop + hoursStart*hourHeight);
-                            bottom = top + (int)((hoursEnd-hoursStart)*hourHeight);
-
-//                            view.invalidate();
-                            view.layout(left, top, right, bottom);
-                        } catch (Exception ignored) {
-                            view.setVisibility(View.GONE);
-                        }
-                    }
-                }
-                colNum++;
-            }
-        }
-
-        public void clear() {
-            timeInterval = null;
-            columns.clear();
-        }
-
-        @NonNull
-        public ArrayList<IEventHolder> getAllItems() {
-            ArrayList<IEventHolder> items = new ArrayList<>();
-            for (List<IEventHolder> column : columns) {
-                items.addAll(column);
-            }
-            return items;
-        }
-        //endregion
-    }
-    //endregion
 
     //region Fields
+    private List<Cluster> clusters = new ArrayList<>();
     private final List<String> hourTextList = new ArrayList<>(24);
-    float hourColWidth = 0;
+    private float hourColWidth = 0;
 
     // Attributes
     private float attrHourHeight = 60;
@@ -849,8 +520,8 @@ public class TimeLineView extends FrameLayout {
         disabledTimePaint.setColor(attrDisabledTimeColor);
         for (MinuteInterval interval: getDisabledTimes()) {
             if (interval.isValid() && interval.isCollide(minMinute, maxMinute)) {
-                float yStart = getPositionYByMinutes(interval.start);
-                float yEnd = getPositionYByMinutes(interval.end);
+                float yStart = getPositionYByMinutes(interval.getStart());
+                float yEnd = getPositionYByMinutes(interval.getEnd());
                 canvas.drawRect(left, yStart, right, yEnd, disabledTimePaint);
             }
         }
@@ -862,11 +533,11 @@ public class TimeLineView extends FrameLayout {
         int minMinute = attrMinHour * 60;
         int maxMinute = attrMaxHour * 60;
         for (ColoredInterval ci: getColoredIntervals()) {
-            MinuteInterval interval = ci.interval;
+            MinuteInterval interval = ci.getInterval();
             if (interval.isValid() && interval.isCollide(minMinute, maxMinute)) {
-                float yStart = getPositionYByMinutes(interval.start);
-                float yEnd = getPositionYByMinutes(interval.end);
-                coloredTimePaint.setColor(ci.color);
+                float yStart = getPositionYByMinutes(interval.getStart());
+                float yEnd = getPositionYByMinutes(interval.getEnd());
+                coloredTimePaint.setColor(ci.getColor());
                 canvas.drawRect(left, yStart, right, yEnd, coloredTimePaint);
             }
         }
@@ -876,8 +547,58 @@ public class TimeLineView extends FrameLayout {
     //region Override view methods
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        measureEventsChange();
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+
+    public void measureEventsChange() {
+        for (Cluster cluster: clusters) {
+            measureEventViews(cluster);
+        }
+    }
+
+    private void measureEventViews(@NonNull Cluster cluster) {
+        if (cluster.isEmpty()) {
+            return;
+        }
+
+        int count = cluster.getColumns();
+        float offsetLeft = getStartX();
+        float width = getEndX() - offsetLeft;
+        float itemWidth = width / count;
+
+        for (List<IEventHolder> column : cluster.columns) {
+            measureColumn(column, itemWidth, attrHourHeight);
+        }
+    }
+
+    private void measureColumn(List<IEventHolder> column, float itemWidth, float hourHeight) {
+        int height;
+        for (IEventHolder item: column) {
+            View view = item.getView();
+            if (view != null && view.getVisibility() != GONE) {
+                try {
+                    float hoursStart = item.getTimeInterval().getStart() / 60.0f;
+                    float hoursEnd = item.getTimeInterval().getEnd() / 60.0f;
+                    height = (int)((hoursEnd-hoursStart)*hourHeight);
+
+                    LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                    if (lp == null) {
+                        lp = new LayoutParams((int)itemWidth, height);
+                    } else {
+                        lp.width = (int) itemWidth;
+                        lp.height = height;
+                    }
+
+                    view.setLayoutParams(lp);
+                    view.measure((int)itemWidth, height);
+                } catch (Exception ignored) {
+                    view.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -886,42 +607,68 @@ public class TimeLineView extends FrameLayout {
         layoutEventsChange();
     }
 
+    public void layoutEventsChange() {
+        for (Cluster cluster: clusters) {
+            layoutEventViews(cluster);
+        }
+    }
+
+    private void layoutEventViews(@NonNull Cluster cluster) {
+        if (cluster.isEmpty()) {
+            return;
+        }
+
+        int count = cluster.getColumns();
+        int colNum = 0;
+        float offsetLeft = getStartX();
+        float width = getEndX() - offsetLeft;
+        float offsetTop = getPositionByHours(0);
+        float itemWidth = width / count;
+
+        for (List<IEventHolder> column : cluster.columns) {
+            layoutColumn(column, colNum, itemWidth, offsetLeft, offsetTop, attrHourHeight);
+            colNum++;
+        }
+    }
+
+    private void layoutColumn(List<IEventHolder> column, int colNum, float itemWidth, float offsetLeft, float offsetTop, float hourHeight) {
+        int left = (int)(colNum*itemWidth + offsetLeft);
+        int right = (int) (left + itemWidth);
+        int top, bottom;
+        for (IEventHolder item: column) {
+            View view = item.getView();
+            if (view != null && view.getVisibility() != GONE) {
+                try {
+                    float hoursStart = item.getTimeInterval().getStart() / 60.0f;
+                    float hoursEnd = item.getTimeInterval().getEnd() / 60.0f;
+                    top = (int) (offsetTop + hoursStart*hourHeight);
+                    bottom = top + (int)((hoursEnd-hoursStart)*hourHeight);
+                    layoutView(view, left, top, right, bottom);
+                } catch (Exception ignored) {
+                    view.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    private void layoutView(View view, int left, int top, int right, int bottom) {
+        LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        if (lp != null) {
+            left += lp.leftMargin;
+            top += lp.topMargin;
+            right -= lp.rightMargin;
+            bottom -= lp.bottomMargin;
+        }
+
+        view.layout(left, top, right, bottom);
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return gestureDetector.onTouchEvent(event); //super.onTouchEvent(event);
     }
-    //endregion
 
-    //region Math positions and time methods
-    public float getPositionByHours(float hour) {
-        return attrHourHeight * (hour - attrMinHour) + getPaddingTop();
-    }
-
-    public float getPositionYByMinutes(int minutes) {
-        return getPositionByHours(minutes/60.0f);
-    }
-
-    public float getHoursByPosition(float pos) {
-        return (pos - getPaddingTop()) / attrHourHeight + attrMinHour;
-    }
-
-    public int getMinutesByPositionY(float pos) {
-//        float minutes = 60*(attrMinHour + pos/attrHourHeight);
-//        return (int) minutes;
-        return (int)(60 * getHoursByPosition(pos));
-    }
-
-    public float getStartX() {
-        return getPaddingLeft() + hourColWidth + attrHourPaddingLeft;
-    }
-
-    public float getEndX() {
-        return getWidth() - getPaddingRight();
-    }
-    //endregion
-
-    //region Clusters methods
-    private List<Cluster> clusters = new ArrayList<>();
     public <T extends IEventHolder> boolean add(T holder) {
         if (holder == null || holder.getTimeInterval() == null || !holder.getTimeInterval().isValid()) {
             return false;
@@ -953,21 +700,7 @@ public class TimeLineView extends FrameLayout {
 
         View view = holder.getView();
         this.addView(view);
-
         return true;
-    }
-
-    protected void reinitEventsRect(@NonNull Cluster cluster) {
-        float offsetX = getStartX();
-        float eventsWidth = getEndX() - offsetX;
-        float offsetY = getPositionByHours(0);
-        cluster.remathViewRect(offsetX, offsetY, eventsWidth, attrHourHeight);
-    }
-
-    public void layoutEventsChange() {
-        for (Cluster cluster: clusters) {
-            reinitEventsRect(cluster);
-        }
     }
 
     public void clearEvents() {
@@ -1000,4 +733,33 @@ public class TimeLineView extends FrameLayout {
         }
     }
     //endregion
+
+    //region Math positions and time methods
+    public float getPositionByHours(float hour) {
+        return attrHourHeight * (hour - attrMinHour) + getPaddingTop();
+    }
+
+    public float getPositionYByMinutes(int minutes) {
+        return getPositionByHours(minutes/60.0f);
+    }
+
+    public float getHoursByPosition(float pos) {
+        return (pos - getPaddingTop()) / attrHourHeight + attrMinHour;
+    }
+
+    public int getMinutesByPositionY(float pos) {
+//        float minutes = 60*(attrMinHour + pos/attrHourHeight);
+//        return (int) minutes;
+        return (int)(60 * getHoursByPosition(pos));
+    }
+
+    public float getStartX() {
+        return getPaddingLeft() + hourColWidth + attrHourPaddingLeft;
+    }
+
+    public float getEndX() {
+        return getWidth() - getPaddingRight();
+    }
+    //endregion
+
 }

@@ -137,9 +137,9 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
     public interface OnContentListener {
         int getMinHour(Calendar date);
         int getMaxHour(Calendar date);
-        List<TimeLineView.IEventHolder> getEvents(Calendar date);
-        List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date);
-        List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date);
+        List<IEventHolder> getEvents(Calendar date);
+        List<ColoredInterval> getColoredIntervals(Calendar date);
+        List<MinuteInterval> getDisabledIntervals(Calendar date);
     }
 
     public interface OnDesignListener {
@@ -660,7 +660,7 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         if (timeLineView != null) {
             initTimeLineViewAttributes(timeLineView);
             timeLineView.invalidate();
-            timeLineView.setOnTimeSelectListener(new TimeLineView.IOnTimeSelectListener() {
+            timeLineView.setOnTimeSelectListener(new IOnTimeSelectListener() {
                 @Override
                 public void onTimePress(Object sender, int minute) {
                     if (DayViewPager.this.dateTimeSelectListener != null) {
@@ -737,9 +737,9 @@ public class DayViewPager extends ViewPager implements DayPagerAdapter.OnContent
         Calendar calendar = getCalendar(localPos);
         int minHour = attrMinHour;
         int maxHour = attrMaxHour;
-        List<TimeLineView.MinuteInterval> disabledIntervals = null;
-        List<TimeLineView.ColoredInterval> coloredIntervals = null;
-        List<TimeLineView.IEventHolder> eventHolders = null;
+        List<MinuteInterval> disabledIntervals = null;
+        List<ColoredInterval> coloredIntervals = null;
+        List<IEventHolder> eventHolders = null;
 
         dayHolder.setDate(calendar.getTime());
 

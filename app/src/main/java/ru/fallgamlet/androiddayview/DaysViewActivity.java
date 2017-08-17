@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import ru.fallgamlet.dayview.ColoredInterval;
 import ru.fallgamlet.dayview.DayPagerAdapter;
 import ru.fallgamlet.dayview.DayViewPager;
+import ru.fallgamlet.dayview.IEventHolder;
+import ru.fallgamlet.dayview.MinuteInterval;
 import ru.fallgamlet.dayview.TimeLineView;
 
 public class DaysViewActivity extends AppCompatActivity {
@@ -38,7 +41,7 @@ public class DaysViewActivity extends AppCompatActivity {
     DayViewPager dayViewPager;
     Random random = new Random();
     Date curDate;
-    List<TimeLineView.MinuteInterval> workIntervals = new ArrayList<>(7);
+    List<MinuteInterval> workIntervals = new ArrayList<>(7);
     List<Integer> colors = new ArrayList<>();
     //endregion
 
@@ -148,7 +151,7 @@ public class DaysViewActivity extends AppCompatActivity {
             for (int i=0; i<7; i++) {
                 int start = 5+random.nextInt(5);
                 int end = 16+random.nextInt(8);
-                TimeLineView.MinuteInterval interval = new TimeLineView.MinuteInterval(start, end);
+                MinuteInterval interval = new MinuteInterval(start, end);
                 workIntervals.add(interval);
             }
         }
@@ -176,7 +179,7 @@ public class DaysViewActivity extends AppCompatActivity {
         return colors.get(i);
     }
 
-    private TimeLineView.MinuteInterval getWorkTime(int calendarWeekDay) {
+    private MinuteInterval getWorkTime(int calendarWeekDay) {
         generateWorkTimes();
         int i;
         switch (calendarWeekDay) {
@@ -208,10 +211,10 @@ public class DaysViewActivity extends AppCompatActivity {
         return workIntervals.get(i);
     }
 
-    private List<TimeLineView.IEventHolder> generateEventHolders(Calendar date) {
-        List<TimeLineView.IEventHolder> holderList = new ArrayList<>();
+    private List<IEventHolder> generateEventHolders(Calendar date) {
+        List<IEventHolder> holderList = new ArrayList<>();
         int weekDay = date.get(Calendar.DAY_OF_WEEK);
-        TimeLineView.MinuteInterval workTime = getWorkTime(weekDay);
+        MinuteInterval workTime = getWorkTime(weekDay);
         int count = 5+random.nextInt(10);
         int hour = 60;
         int minMinute = workTime.getStart()*hour;
@@ -246,7 +249,7 @@ public class DaysViewActivity extends AppCompatActivity {
 
             holder.setListener(new OnClickListener() {
                 @Override
-                public void onClick(TimeLineView.IEventHolder holder) {
+                public void onClick(IEventHolder holder) {
                     MyEventHolder myholder = ((MyEventHolder) holder);
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
                     SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -290,17 +293,17 @@ public class DaysViewActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public List<TimeLineView.IEventHolder> getEvents(Calendar date) {
+                public List<IEventHolder> getEvents(Calendar date) {
                     return generateEventHolders(date);
                 }
 
                 @Override
-                public List<TimeLineView.ColoredInterval> getColoredIntervals(Calendar date) {
+                public List<ColoredInterval> getColoredIntervals(Calendar date) {
                     return null;
                 }
 
                 @Override
-                public List<TimeLineView.MinuteInterval> getDisabledIntervals(Calendar date) {
+                public List<MinuteInterval> getDisabledIntervals(Calendar date) {
                     int hour = -1;
                     if (date != null) {
                         int weekDay = date.get(Calendar.DAY_OF_WEEK);
@@ -310,8 +313,8 @@ public class DaysViewActivity extends AppCompatActivity {
                     int start = (hour - 1) * 60;
                     int end = start + 90;
 
-                    TimeLineView.MinuteInterval interval = new TimeLineView.MinuteInterval(start, end);
-                    List<TimeLineView.MinuteInterval> disableIntervals = new ArrayList<>(2);
+                    MinuteInterval interval = new MinuteInterval(start, end);
+                    List<MinuteInterval> disableIntervals = new ArrayList<>(2);
                     disableIntervals.add(interval);
 
                     return disableIntervals;
@@ -399,18 +402,17 @@ public class DaysViewActivity extends AppCompatActivity {
 
     //region Sub classes and interfaces
     interface OnClickListener {
-        void onClick(TimeLineView.IEventHolder holder);
+        void onClick(IEventHolder holder);
     }
 
-    public static class  MyEventHolder implements TimeLineView.IEventHolder, View.OnClickListener {
+    public static class  MyEventHolder implements IEventHolder, View.OnClickListener {
         private String title;
         private String subtitle;
         private Date start, end;
-        private TimeLineView.MinuteInterval timeInterval;
+        private MinuteInterval timeInterval;
 
         private View rootView;
-        private TextView startView;
-        private TextView endView;
+        private TextView timeView;
         private TextView titleView;
         private TextView subtitleView;
         private SimpleDateFormat timeFormatter;
@@ -467,8 +469,7 @@ public class DaysViewActivity extends AppCompatActivity {
             this.rootView = rootView;
             if (rootView != null) {
                 rootView.setOnClickListener(this);
-                startView = (TextView) rootView.findViewById(R.id.startView);
-                endView = (TextView) rootView.findViewById(R.id.endView);
+                timeView = (TextView) rootView.findViewById(R.id.timeView);
                 titleView = (TextView) rootView.findViewById(R.id.titleView);
                 subtitleView = (TextView) rootView.findViewById(R.id.subtitleView);
             }
@@ -480,12 +481,12 @@ public class DaysViewActivity extends AppCompatActivity {
         }
 
         @Override
-        public TimeLineView.MinuteInterval getTimeInterval() {
+        public MinuteInterval getTimeInterval() {
             if (start == null || end == null) {
                 return null;
             }
             if (timeInterval == null) {
-                timeInterval = new TimeLineView.MinuteInterval();
+                timeInterval = new MinuteInterval();
             }
 
             Calendar calendar = Calendar.getInstance();
@@ -534,13 +535,12 @@ public class DaysViewActivity extends AppCompatActivity {
         }
 
         public void notifyDataChanged() {
-            if (titleView != null) { startView.setText(title); }
+            if (titleView != null) { titleView.setText(title); }
             if (subtitleView != null) { subtitleView.setText(subtitle); }
 
-            String startStr = null
-                    , endStr = null;
+            String timeStr = null;
 
-            TimeLineView.MinuteInterval timeInterval = getTimeInterval();
+            MinuteInterval timeInterval = getTimeInterval();
             if (getTimeInterval() != null) {
                 int startMinute = timeInterval.getStart();
                 int endMinute = timeInterval.getEnd();
@@ -548,16 +548,21 @@ public class DaysViewActivity extends AppCompatActivity {
                 calendar.set(Calendar.HOUR_OF_DAY, startMinute / 60);
                 calendar.set(Calendar.MINUTE, startMinute % 60);
 
+                String startStr, endStr;
+
                 startStr = formatTime(calendar.getTime());
 
                 calendar.set(Calendar.HOUR_OF_DAY, endMinute/60);
                 calendar.set(Calendar.MINUTE, endMinute%60);
 
                 endStr = formatTime(calendar.getTime());
+
+                timeStr = String.format(Locale.getDefault(), " %s - %s", startStr, endStr);
             }
 
-            if (startView != null) { startView.setText(startStr); }
-            if (endView != null) { endView.setText(endStr); }
+            if (timeView != null) {
+                timeView.setText(timeStr);
+            }
         }
 
         @Override
