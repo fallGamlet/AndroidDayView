@@ -4,12 +4,6 @@
     android:layout_height="wrap_content"
     android:theme="@style/AppTheme.EventItem"
     android:background="#107ab6"
-    android:layout_marginTop="1dp"
-    android:layout_marginBottom="3dp"
-    android:layout_marginStart="2dp"
-    android:layout_marginLeft="2dp"
-    android:layout_marginEnd="4dp"
-    android:layout_marginRight="4dp"
     android:foreground="@drawable/selector_fg_default">
 
     <View

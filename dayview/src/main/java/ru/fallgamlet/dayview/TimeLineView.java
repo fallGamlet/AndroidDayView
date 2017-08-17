@@ -748,8 +748,6 @@ public class TimeLineView extends FrameLayout {
     }
 
     public int getMinutesByPositionY(float pos) {
-//        float minutes = 60*(attrMinHour + pos/attrHourHeight);
-//        return (int) minutes;
         return (int)(60 * getHoursByPosition(pos));
     }
 
